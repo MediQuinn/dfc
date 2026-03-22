@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="fil">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MediQuinn — Dispensing Flowcharts v6</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --mq-blue:#1565C0; --mq-blue-dk:#0D47A1; --mq-blue-lt:#E3F2FD; --mq-blue-mid:#1976D2;
+  --mq-green:#2E7D32; --mq-green-md:#388E3C; --mq-green-lt:#E8F5E9;
+  --amber:#E65100; --amber-lt:#FFF8E1; --amber-bdr:#F9A825;
+  --red-dk:#B71C1C; --red-md:#C62828; --red-lt:#FFEBEE;
+  --pink-dk:#880E4F; --pink-lt:#FCE4EC;
+  --org-dk:#BF360C; --org-lt:#FFF3E0;
+  --pur-dk:#4A148C; --pur-lt:#F3E5F5;
+  --ink:#1A1A2E; --soft:#37474F; --line:#DEE6EF;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:16px;}
+body{font-family:'Nunito Sans',sans-serif;background:#B8CCE0;color:var(--ink);line-height:1.55;}
+
+/* NAV */
+.nav{background:linear-gradient(120deg,var(--mq-blue-dk),var(--mq-blue-mid));padding:10px 20px;position:sticky;top:0;z-index:999;display:flex;align-items:center;gap:12px;flex-wrap:wrap;box-shadow:0 3px 16px rgba(0,0,0,.35);}
+.nav-brand{color:#fff;font-family:'Nunito',sans-serif;font-weight:900;font-size:16px;white-space:nowrap;line-height:1.2;}
+.nav-brand small{display:block;font-size:10px;font-weight:600;color:#90CAF9;}
+.nav-sel{flex:1;min-width:280px;max-width:560px;padding:9px 14px;font-size:14px;font-weight:700;border-radius:7px;border:2px solid rgba(255,255,255,.3);background:#fff;color:var(--mq-blue-dk);cursor:pointer;}
+.nav-badge{background:var(--mq-green-md);color:#fff;font-size:11px;font-weight:800;padding:5px 12px;border-radius:20px;white-space:nowrap;}
+.nav-print{background:#fff;color:var(--mq-blue-dk);border:none;padding:9px 18px;border-radius:7px;cursor:pointer;font-size:13px;font-weight:800;white-space:nowrap;}
+.nav-print:hover{background:var(--mq-blue-lt);}
+
+/* CHART */
+.chart{display:none;max-width:1020px;margin:24px auto 56px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.22);border-top:5px solid var(--mq-blue);}
+.chart.active{display:block;}
+
+/* HEADER */
+.ch{background:linear-gradient(120deg,var(--mq-blue-dk),var(--mq-blue-mid));padding:16px 24px 12px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.ch-num{font-size:11px;font-weight:800;color:#90CAF9;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px;}
+.ch-title{font-family:'Nunito',sans-serif;color:#fff;font-size:22px;font-weight:900;line-height:1.2;}
+.ch-sub{color:#B3D1FF;font-size:12px;margin-top:4px;font-weight:600;}
+.ch-badge{background:var(--mq-green-md);color:#fff;font-size:11px;font-weight:800;padding:6px 14px;border-radius:20px;white-space:nowrap;flex-shrink:0;}
+
+/* START */
+.start{margin:16px 20px 10px;background:linear-gradient(120deg,#F57F17,#FF8F00);border-radius:10px;padding:14px 20px;box-shadow:0 3px 10px rgba(245,127,23,.35);}
+.start-t{color:#fff;font-family:'Nunito',sans-serif;font-size:15px;font-weight:900;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+.start-q{color:#FFF8E1;font-size:14px;line-height:1.6;}
+
+/* DECISION */
+.dec{display:flex;align-items:center;justify-content:center;padding:8px 24px 6px;background:#fff;}
+.dl{height:3px;flex:1;max-width:120px;}
+.dl-r{background:linear-gradient(90deg,var(--red-md),#ccc);}
+.dl-g{background:linear-gradient(90deg,#ccc,var(--mq-green));}
+.dl-m{background:#ddd;flex:2;max-width:220px;}
+.diamond{width:120px;height:60px;clip-path:polygon(50% 0%,100% 50%,50% 100%,0 50%);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Nunito',sans-serif;font-weight:900;font-size:16px;color:#fff;flex-shrink:0;}
+.d-r{background:linear-gradient(135deg,var(--red-md),var(--red-dk));}
+.d-g{background:linear-gradient(135deg,var(--mq-green),var(--mq-green-md));}
+.d-sm{font-size:10px;font-weight:600;opacity:.85;}
+
+/* COLS */
+.cols{display:grid;grid-template-columns:1fr 1fr;background:var(--line);border-top:3px solid var(--mq-blue);}
+.col{background:#fff;padding:16px;display:flex;flex-direction:column;gap:11px;}
+.col:first-child{border-right:3px solid var(--line);}
+
+/* SECTIONS */
+.sec{border-radius:8px;overflow:hidden;border:2px solid transparent;}
+.sh{padding:8px 14px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:900;letter-spacing:.8px;text-transform:uppercase;color:#fff;text-align:center;}
+.sb{padding:12px 14px;}
+.rf{border-color:#FFCDD2;} .rf .sh{background:linear-gradient(90deg,var(--red-dk),var(--red-md));} .rf .sb{background:var(--red-lt);}
+.ref{border-color:#F8BBD0;} .ref .sh{background:linear-gradient(90deg,var(--pink-dk),#AD1457);} .ref .sb{background:var(--pink-lt);}
+.paal{border-color:#FFE0B2;} .paal .sh{background:linear-gradient(90deg,#BF360C,var(--amber));} .paal .sb{background:var(--org-lt);}
+.strict{border-color:#CE93D8;} .strict .sh{background:linear-gradient(90deg,var(--pur-dk),#6A1B9A);} .strict .sb{background:var(--pur-lt);}
+.inote{border-color:#A5D6A7;} .inote .sh{background:linear-gradient(90deg,#1B5E20,var(--mq-green));} .inote .sb{background:var(--mq-green-lt);}
+.assess{border-color:#90CAF9;} .assess .sh{background:linear-gradient(90deg,var(--mq-blue-dk),var(--mq-blue));} .assess .sb{background:var(--mq-blue-lt);}
+.mgmt{border-color:#B0BEC5;} .mgmt .sh{background:linear-gradient(90deg,#1A237E,#283593);} .mgmt .sb{background:#F5F7FC;}
+.supp{border-color:#A5D6A7;} .supp .sh{background:linear-gradient(90deg,var(--mq-green),var(--mq-green-md));} .supp .sb{background:var(--mq-green-lt);}
+
+/* TYPOGRAPHY */
+.sb ul{padding-left:18px;}
+.sb li{font-size:14px;margin-bottom:5px;line-height:1.55;color:var(--soft);}
+.sb li strong{color:var(--ink);font-weight:800;}
+.sub{font-family:'Nunito',sans-serif;font-size:13px;font-weight:900;color:var(--mq-blue-dk);margin:10px 0 5px;padding-bottom:4px;border-bottom:2.5px solid #BBDEFB;letter-spacing:.3px;}
+.nodo{font-size:14px;font-weight:800;color:var(--red-dk);padding:4px 0 4px 22px;position:relative;margin-bottom:4px;line-height:1.45;}
+.nodo::before{content:"⊘";position:absolute;left:0;font-size:15px;color:var(--red-md);}
+.warn{font-size:13px;font-weight:700;color:var(--org-dk);padding:4px 0 4px 20px;position:relative;margin:3px 0 5px;line-height:1.45;}
+.warn::before{content:"⚠";position:absolute;left:0;}
+
+/* BRAND BOX */
+.brand{background:var(--amber-lt);border:2.5px solid var(--amber-bdr);border-radius:8px;padding:9px 12px;margin:6px 0 10px;}
+.blbl{font-size:10px;font-weight:900;color:#BF360C;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+.bnames{font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;color:#4E342E;margin-bottom:6px;line-height:1.4;}
+
+/* AGE TABLE */
+.dt{width:100%;border-collapse:collapse;margin-top:4px;border-radius:5px;overflow:hidden;}
+.dt th{background:var(--mq-blue);color:#fff;font-size:11px;font-weight:800;padding:5px 8px;text-align:left;}
+.dt td{font-size:12px;padding:5px 8px;border-bottom:1px solid #E3F2FD;color:var(--ink);line-height:1.45;vertical-align:top;}
+.dt tr:last-child td{border-bottom:none;}
+.dt tr:nth-child(even) td{background:#F5F9FF;}
+.dt .al{font-weight:800;color:var(--mq-blue-dk);white-space:nowrap;width:36%;}
+.dt .nr td{background:#FFEBEE;font-size:11.5px;color:var(--red-dk);font-weight:700;font-style:italic;}
+.dt .nw td{background:#FFF3E0;font-size:11.5px;color:var(--org-dk);font-weight:700;}
+
+/* FOOTER */
+.cfoot{background:var(--mq-blue);display:grid;grid-template-columns:1fr 1fr;border-top:3px solid var(--mq-blue-dk);}
+.cfi{padding:9px 16px;font-size:11px;color:#B3D1FF;text-align:center;line-height:1.5;}
+.cfi:first-child{border-right:1px solid rgba(255,255,255,.18);}
+.cfi strong{color:#fff;}
+
+/* PRINT */
+@media print{
+  .nav{display:none;}
+  body{background:#fff;font-size:12px;}
+  .chart{display:block!important;max-width:100%;box-shadow:none;border-radius:0;margin:0;page-break-after:always;border-top:4px solid var(--mq-blue);}
+  .ch-title{font-size:18px;}
+  .sb li,.dt td,.dt th{font-size:11px;}
+  .col{padding:10px;}
+  .brand{padding:6px 10px;margin:4px 0 7px;}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-brand">🏥 MediQuinn Pharmacy<small>Internal Dispensing Flowcharts — v6 · OTC Only · Fully Fact-Checked</small></div>
+  <select class="nav-sel" id="sel" onchange="show(this.value)">
+    <option value="">— Pumili ng Flowchart —</option>
+    <option value="c01">01 · Fungal Infection (An-an / Buni / Alipunga)</option>
+    <option value="c02">02 · Burns — Paso</option>
+    <option value="c03">03 · Cold &amp; Flu (Sipon at Trangkaso)</option>
+    <option value="c04">04 · Diarrhea / LBM</option>
+    <option value="c05">05 · Dry Cough (Tuyong Ubo)</option>
+    <option value="c06">06 · Headache (Sakit ng Ulo)</option>
+    <option value="c07">07 · Dizziness / Motion Sickness</option>
+    <option value="c08">08 · Skin Irritation (Kati-Kati)</option>
+    <option value="c09">09 · Joint Pain (Masakit na Kasu-Kasuan)</option>
+    <option value="c10">10 · Mouth Ulcer (Singaw)</option>
+    <option value="c11">11 · Sore Throat (Sakit ng Lalamunan)</option>
+    <option value="c12">12 · Stomach Pain (Sakit ng Tiyan)</option>
+    <option value="c13">13 · Minor Wound (Sugat / Hiwa / Gasgas)</option>
+    <option value="c14">14 · Toothache (Masakit na Ngipin)</option>
+    <option value="c15">15 · Vomiting (Pagsusuka)</option>
+    <option value="c16">16 · Productive Cough (Ubong may Plema)</option>
+    <option value="c17">17 · Toothache — PA Screening Guide</option>
+  </select>
+  <span class="nav-badge">✅ OTC Only · Age-Grouped Doses</span>
+  <button class="nav-print" onclick="window.print()">🖨 I-Print Lahat</button>
+</nav>
+
+<!-- helper macros as HTML templates repeated per chart -->
+
+<!-- ═══ CHART 01 — FUNGAL ═══ -->
+<div class="chart" id="c01">
+<div class="ch"><div><div class="ch-num">Chart 01 of 17</div><div class="ch-title">An-an · Buni · Alipunga · Jock Itch</div><div class="ch-sub">Fungal Skin Infection — Internal Dispensing Flowchart</div></div><div class="ch-badge">✅ OTC Only</div></div>
+<div class="start"><div class="start-t">START: Pasyente na may Hinalang Fungal Infection</div><div class="start-q">Kailan nagsimula? Saan banda? · Makati ba? May pamumula, scaling, o bilog na pantal?</div></div>
+<div class="dec"><div class="dl dl-r"></div><div class="diamond d-r"><span class="d-sm">Red Flags?</span>YES</div><div class="dl dl-m"></div><div class="diamond d-g"><span class="d-sm">Red Flags?</span>NO</div><div class="dl dl-g"></div></div>
+<div class="cols">
+<div class="col">
+  <div class="sec rf"><div class="sh">🚩 Red Flags — Huwag Bigyan ng OTC</div><div class="sb"><ul>
+    <li>Malawak o buong katawan ang apektado</li><li>May nana, sugat, o bacterial infection</li><li>May lagnat</li><li>Fungal infection sa mukha o anit (scalp)</li><li>Paulit-ulit kahit may gamutan na</li><li>Hindi gumagaling &gt; 2–3 linggo</li>
+  </ul></div></div>
+  <div class="sec ref"><div class="sh">⚕ I-Refer sa Pharmacist / Doctor AGAD</div><div class="sb"><ul>
+    <li>Buntis o pinanghihinalaang buntis</li><li><strong>Bata &lt; 2 taong gulang</strong></li><li>Senior citizen</li><li>May diabetes o immunocompromised</li><li>Umiinom ng steroids o immunosuppressants</li>
+  </ul></div></div>
+  <div class="sec paal"><div class="sh">📢 Paalala sa Pasyente</div><div class="sb"><ul>
+    <li>Ituloy ang gamot kahit gumaan na — <strong>minimum 2–4 linggo</strong></li><li><strong>Steroid creams ay nagpapalala</strong> ng fungal — huwag gamitin</li><li>Huwag ibahagi ang tuwalya, damit, o sapatos</li>
+  </ul></div></div>
+  <div class="sec strict"><div class="sh">🚫 Strict Reminders</div><div class="sb">
+    <div class="nodo">NO ANTIBIOTICS — hindi ito bacterial</div>
+    <div class="nodo">NO STEROIDS — nagpapalala ng fungal</div>
+    <div class="nodo">NO EARLY STOPPING — babalik ang impeksyon</div>
+  </div></div>
+  <div class="sec inote"><div class="sh">📋 Internal Note — Staff Only</div><div class="sb"><ul>
+    <li>An-an (Tinea versicolor): balat ay bumabalik nang dahan-dahan kahit patay na ang fungus — normal ito, ipaalam sa pasyente</li><li>Non-response pagkatapos ng tamang gamutan = referral</li>
+  </ul></div></div>
+</div>
+<div class="col">
+  <div class="sec assess"><div class="sh">🔍 Assess Likely Type</div><div class="sb">
+    <div class="sub">TINEA CORPORIS (Buni / Ringworm)</div><ul><li>Bilog o hugis-singsing na pantal, may scaling, makati</li></ul>
+    <div class="sub">TINEA PEDIS (Alipunga / Athlete's Foot)</div><ul><li>Makati at nagbabalat sa paa, sa pagitan ng daliri</li></ul>
+    <div class="sub">TINEA CRURIS (Jock Itch)</div><ul><li>Mapulang makating pantal sa singit, malinaw na hangganan</li></ul>
+    <div class="sub">TINEA VERSICOLOR (An-an)</div><ul><li>Maputi o maitim na patches, hindi masyadong makati, mas halata kapag pawisin</li></ul>
+  </div></div>
+  <div class="sec mgmt"><div class="sh">💊 Topical Antifungal — Piliin Ang ISA · Apply 1–2× Araw-Araw</div><div class="sb">
+    <ul>
+      <li><strong>Clotrimazole 1% cream</strong><div class="brand"><div class="blbl">📦 PH OTC Brand</div><div class="bnames">Canesten cream · Clotrimazole (generic)</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Tagal ng Gamutan</th></tr>
+          <tr><td class="al">Adults/≥18y</td><td>Manipis na patong · 2× araw · Tinea pedis: 4 linggo · Iba: 2–3 linggo</td></tr>
+          <tr><td class="al">Bata ≥ 2y</td><td>Pareho ng adults · Manipis na patong lamang · Huwag sa mukha</td></tr>
+          <tr class="nr"><td colspan="2">❌ Bata &lt; 2 taon: I-REFER sa doktor</td></tr>
+        </table></div></li>
+      <li><strong>Ketoconazole 2% cream</strong><div class="brand"><div class="blbl">📦 PH OTC Brand</div><div class="bnames">Nizoral cream · Fungiderm cream<br>Para sa An-an: Nizoral shampoo bilang lotion — iwanan 5–15 min bago banlawan</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Tagal ng Gamutan</th></tr>
+          <tr><td class="al">Adults/≥18y</td><td>1–2× araw · 2–4 linggo · An-an: 1× araw × 5 araw</td></tr>
+          <tr><td class="al">Bata ≥ 2y</td><td>Pareho ng adults · Manipis na patong lamang</td></tr>
+          <tr class="nr"><td colspan="2">❌ Bata &lt; 2 taon: I-REFER sa doktor</td></tr>
+        </table></div></li>
+      <li><strong>Miconazole 2% cream</strong><div class="brand"><div class="blbl">📦 PH OTC Brand</div><div class="bnames">Daktarin cream · Miconazole (generic)</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Tagal ng Gamutan</th></tr>
+          <tr><td class="al">Adults/≥18y</td><td>2× araw · Ituloy 1 linggo pagkatapos mawala ang sintomas</td></tr>
+          <tr><td class="al">Bata ≥ 2y</td><td>Pareho ng adults</td></tr>
+          <tr class="nr"><td colspan="2">❌ Bata &lt; 2 taon: I-REFER sa doktor</td></tr>
+        </table></div></li>
+    </ul>
+    <div class="warn">I-apply lampas pa sa gilid ng pantal (1–2 cm) — kumakalat na rin ang fungus doon</div>
+  </div></div>
+  <div class="sec supp"><div class="sh">✅ Supportive Care</div><div class="sb"><ul>
+    <li>Panatilihing <strong>tuyo at malinis</strong> ang apektadong bahagi</li><li>Palitan medyas at underwear <strong>araw-araw</strong></li><li>Iwasan masisikip at pawisin na damit</li><li>Huwag ibahagi ang tuwalya, sapatos, o damit</li>
+  </ul></div></div>
+</div>
+</div>
+<div class="cfoot"><div class="cfi"><strong>⚠ Hindi ito diagnostic tool.</strong> Para sa MediQuinn Pharmacy staff internal use lamang. · All medications listed are OTC (over-the-counter) — walang reseta na kailangan.</div><div class="cfi"><strong>Trusted Care, Right Around the Corner</strong> · mediquinnpharmacy@gmail.com</div></div>
+</div>
+
+<!-- ═══ CHART 02 — BURNS ═══ -->
+<div class="chart" id="c02">
+<div class="ch"><div><div class="ch-num">Chart 02 of 17</div><div class="ch-title">Burns · Paso</div><div class="ch-sub">Thermal Injury — Internal Dispensing Flowchart</div></div><div class="ch-badge">✅ OTC Only</div></div>
+<div class="start"><div class="start-t">START: Pasyente na may Paso</div><div class="start-q">Kailan nangyari? Ano ang sanhi (init, tubig, langis, kuryente, kemikal)? · Gaano kalaki at saan ang paso?</div></div>
+<div class="dec"><div class="dl dl-r"></div><div class="diamond d-r"><span class="d-sm">Red Flags?</span>YES</div><div class="dl dl-m"></div><div class="diamond d-g"><span class="d-sm">Red Flags?</span>NO</div><div class="dl dl-g"></div></div>
+<div class="cols">
+<div class="col">
+  <div class="sec rf"><div class="sh">🚩 Red Flags — I-Refer / ER Agad</div><div class="sb"><ul>
+    <li>Malaking paso — mas malaki pa sa palad ng pasyente</li><li>Paso sa mukha, mata, tenga, kamay, paa, o singit</li><li>Paso mula sa kuryente o kemikal — <strong>ER agad</strong></li><li>Malalim na paso: maputi, itim, o walang nararamdamang sakit</li><li>May pumutok na malalaking paltos</li><li>Signs ng infection: nana, pamumula, lagnat</li><li>Paso sa bata o senior (kahit mukhang maliit)</li>
+  </ul></div></div>
+  <div class="sec ref"><div class="sh">⚕ I-Refer sa Pharmacist / Doctor AGAD</div><div class="sb"><ul>
+    <li>Buntis o pinanghihinalaang buntis</li><li><strong>Bata &lt; 2 taong gulang</strong> o Senior citizen</li><li>May diabetes o immunocompromised</li><li>Paso &gt; 24 oras na at hindi pa gumagaling</li><li>Hindi updated sa tetanus vaccination</li>
+  </ul></div></div>
+  <div class="sec paal"><div class="sh">📢 Paalala sa Pasyente</div><div class="sb"><ul>
+    <li><strong>PALAMIGIN MUNA</strong> bago mag-apply ng anumang produkto — ito ang pinaka-importanteng hakbang</li><li>Kung mamula, mamaga, o mag-nana → magpatingin</li><li>Palitan ang dressing <strong>araw-araw</strong></li>
+  </ul></div></div>
+  <div class="sec strict"><div class="sh">🚫 Strict Reminders</div><div class="sb">
+    <div class="nodo">NO toothpaste, mantikilya, oils, o yelo sa paso</div>
+    <div class="nodo">NO steroids sa paso</div>
+    <div class="nodo">NO antibiotics para sa routine minor burns</div>
+    <div class="nodo">NO pagsabog ng paltos — maaaring mag-infect</div>
+    <div class="nodo">NO IBUPROFEN para sa burns — nagdi-delay ng wound healing</div>
+  </div></div>
+  <div class="sec inote"><div class="sh">📋 Internal Note — Staff Only</div><div class="sb"><ul>
+    <li><strong>Cool running water muna ng 20 minuto</strong> — bago mag-apply ng ointment</li><li>Paracetamol lang ang pain reliever para sa burns — hindi Ibuprofen</li>
+  </ul></div></div>
+</div>
+<div class="col">
+  <div class="sec assess"><div class="sh">🔍 Assess Burn Type</div><div class="sb">
+    <div class="sub">FIRST-DEGREE (Superficial)</div><ul><li>Namumula at masakit · Walang paltos · Naghihilom sa 3–5 araw</li></ul>
+    <div class="sub">SUPERFICIAL SECOND-DEGREE</div><ul><li>May maliit na paltos · Basa at masakit · Naghihilom sa 1–3 linggo</li></ul>
+    <div class="sub">DEEP SECOND / THIRD-DEGREE → ER AGAD</div><ul><li>Maputi o itim · Maaaring walang nararamdamang sakit</li></ul>
+  </div></div>
+  <div class="sec mgmt"><div class="sh">💊 First Aid + Pain Management — Lahat ay OTC</div><div class="sb">
+    <div class="sub">STEP 1 — PALAMIGIN AGAD (20 MINUTO)</div>
+    <ul><li>Cool running water (hindi yelo) · Pwede hanggang 3 oras mula nang mangyari</li></ul>
+    <div class="warn">HUWAG: yelo, toothpaste, mantikilya, kape, o anumang home remedy</div>
+    <div class="sub">STEP 2 — PROTEKTAHAN</div>
+    <ul>
+      <li><strong>Petroleum Jelly</strong><div class="brand"><div class="blbl">📦 PH OTC Brand</div><div class="bnames">Vaseline Pure Petroleum Jelly</div>
+        <table class="dt"><tr><th>Edad</th><th>Paano Gamitin</th></tr>
+          <tr><td class="al">Lahat ng edad ≥ 2y</td><td>Manipis na patong · 2–3× araw · Hayaang manatiling malamig</td></tr>
+          <tr class="nr"><td colspan="2">❌ Bata &lt; 2y: I-REFER sa doktor</td></tr>
+        </table></div></li>
+      <li><strong>Non-stick Sterile Dressing</strong><div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Elastoplast non-stick · Sterile gauze (generic)</div>
+        <table class="dt"><tr><th>Edad</th><th>Paano Gamitin</th></tr>
+          <tr><td class="al">Lahat ng edad</td><td>Palitan araw-araw o kapag nabasa · Huwag masyadong mahigpit ang pagbibigkis</td></tr>
+        </table></div></li>
+    </ul>
+    <div class="sub">PARA SA SAKIT — PARACETAMOL LAMANG (HINDI IBUPROFEN)</div>
+    <ul>
+      <li><strong>Paracetamol</strong><div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Biogesic · Tempra · Calpol · Panadol</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Interval · Max Bawat Araw</th></tr>
+          <tr><td class="al">Adults ≥18y</td><td>500mg–1g · Bawat 4–6 oras · Max 4g/araw</td></tr>
+          <tr><td class="al">Elderly &gt;65y</td><td>500mg · Bawat 6 oras · Max 2–3g/araw</td></tr>
+          <tr><td class="al">Bata 6–12y</td><td>10–15mg/kg/dose · Bawat 4–6 oras · Gamitin ang syrup</td></tr>
+          <tr><td class="al">Bata 2–5y</td><td>10–15mg/kg/dose syrup · Bawat 4–6 oras · (approx. 80–160mg para sa 10–15kg na bata) · Gamitin ang may kasamang dosing cup</td></tr>
+          <tr class="nr"><td colspan="2">❌ Bata &lt; 3 taon: I-REFER sa doktor · Max 5 doses sa 24 oras</td></tr>
+        </table></div></li>
+    </ul>
+    <div class="warn">IWASAN ang Ibuprofen para sa burns — nagdi-delay ng wound healing</div>
+  </div></div>
+  <div class="sec supp"><div class="sh">✅ Supportive Care</div><div class="sb"><ul>
+    <li>Palitan dressing araw-araw o kapag nabasa</li><li>Iwasan direktang araw habang naghihilom</li><li>Kumain ng nutritious food at mag-hydrate para sa healing</li>
+  </ul></div></div>
+</div>
+</div>
+<div class="cfoot"><div class="cfi"><strong>⚠ Hindi ito diagnostic tool.</strong> Para sa MediQuinn Pharmacy staff internal use lamang. · All medications listed are OTC (over-the-counter) — walang reseta na kailangan.</div><div class="cfi"><strong>Trusted Care, Right Around the Corner</strong> · mediquinnpharmacy@gmail.com</div></div>
+</div>
+
+<!-- ═══ CHART 03 — COLD & FLU ═══ -->
+<div class="chart" id="c03">
+<div class="ch"><div><div class="ch-num">Chart 03 of 17</div><div class="ch-title">Cold &amp; Flu · Sipon at Trangkaso</div><div class="ch-sub">Upper Respiratory Infection — Internal Dispensing Flowchart</div></div><div class="ch-badge">✅ OTC Only</div></div>
+<div class="start"><div class="start-t">START: Pasyente na may Cold / Flu Symptoms</div><div class="start-q">Kailan nagsimula? May lagnat ba? · May ubo, sipon, baradong ilong, o sakit ng katawan?</div></div>
+<div class="dec"><div class="dl dl-r"></div><div class="diamond d-r"><span class="d-sm">Red Flags?</span>YES</div><div class="dl dl-m"></div><div class="diamond d-g"><span class="d-sm">Red Flags?</span>NO</div><div class="dl dl-g"></div></div>
+<div class="cols">
+<div class="col">
+  <div class="sec rf"><div class="sh">🚩 Red Flags — I-Refer Agad</div><div class="sb"><ul>
+    <li>Lagnat ≥ 38.5°C o nagtatagal &gt; 3 araw</li><li>Hirap huminga o chest pain</li><li>Matinding panghihina o hilo</li><li>Paulit-ulit na pagsusuka</li><li>May dugo sa plema</li><li>Severe sore throat — hirap lumunok</li><li>Symptoms &gt; 7 araw na hindi gumagaling o lumalala</li>
+  </ul></div></div>
+  <div class="sec ref"><div class="sh">⚕ I-Refer sa Pharmacist / Doctor AGAD</div><div class="sb"><ul>
+    <li>Buntis o pinanghihinalaang buntis</li><li><strong>Bata &lt; 6 taong gulang</strong> o Senior citizen</li><li>May hika, COPD, o TB</li><li>May sakit sa puso, kidney, o liver</li><li>Immunocompromised · Umiinom ng maraming maintenance meds</li>
+  </ul></div></div>
+  <div class="sec paal"><div class="sh">📢 Paalala sa Pasyente</div><div class="sb"><ul>
+    <li>Kung hindi gumaling sa 3–5 araw, magpatingin</li><li>Kung lumalala o may hirap huminga — ER agad</li><li><strong>⚠ Bioflu, Neozep, Decolgen, Sinutab ay NAGLALAMAN NA NG PARACETAMOL — HUWAG dagdagan ng Biogesic!</strong></li>
+  </ul></div></div>
+  <div class="sec strict"><div class="sh">🚫 Strict Reminders</div><div class="sb">
+    <div class="nodo">NO ANTIBIOTICS — viral ang karaniwang cold/flu</div>
+    <div class="nodo">NO ANTIVIRALS — Rx lamang, hindi OTC</div>
+    <div class="nodo">NO PAGSASABAY ng mga produktong may Paracetamol</div>
+  </div></div>
+  <div class="sec inote"><div class="sh">📋 Internal Note — Staff Only</div><div class="sb"><ul>
+    <li>OTC = symptom control lamang — hindi lunas sa virus</li><li>Combo products (Bioflu/Neozep) ay may Paracetamol na — ipaliwanag ito sa pasyente bago magbigay ng karagdagang pain reliever</li><li>Persistent/lumalalang symptoms = referral, hindi repeat sale</li>
+  </ul></div></div>
+</div>
+<div class="col">
+  <div class="sec assess"><div class="sh">🔍 Assess Dominant Symptom</div><div class="sb">
+    <div class="sub">LAGNAT / BODY PAIN</div><ul><li>Mainit ang pakiramdam · Sakit ng katawan at ulo</li></ul>
+    <div class="sub">SIPON / BARADONG ILONG</div><ul><li>Tumutulo o barado ang ilong · Bahing · Makati ilong</li></ul>
+    <div class="sub">TUYONG UBO (Walang plema)</div><ul><li>Walang plema · Naiirita ang lalamunan</li></ul>
+    <div class="sub">UBONG MAY PLEMA</div><ul><li>May plema · Parang barado ang dibdib</li></ul>
+  </div></div>
+  <div class="sec mgmt"><div class="sh">💊 OTC Management — Ayon sa Dominant Symptom</div><div class="sb">
+    <div class="sub">LAGNAT / BODY PAIN — UNA-UNAHANG GAMITIN</div>
+    <ul>
+      <li><strong>Paracetamol</strong><div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Biogesic · Tempra · Calpol · Panadol</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Interval · Max Bawat Araw</th></tr>
+          <tr><td class="al">Adults ≥18y</td><td>500mg–1g · Bawat 4–6 oras · Max 4g/araw</td></tr>
+          <tr><td class="al">Elderly &gt;65y</td><td>500mg · Bawat 6 oras · Max 2–3g/araw</td></tr>
+          <tr><td class="al">Bata 6–12y</td><td>10–15mg/kg/dose · Bawat 4–6 oras · Gamitin ang syrup</td></tr>
+          <tr><td class="al">Bata 2–5y</td><td>10–15mg/kg/dose syrup · Bawat 4–6 oras · (approx. 80–160mg para sa 10–15kg na bata) · Gamitin ang may kasamang dosing cup</td></tr>
+          <tr class="nr"><td colspan="2">❌ Bata &lt; 3y: I-REFER · ⚠ Max 5 doses/24h · Huwag pagsabayin sa combo products</td></tr>
+        </table></div></li>
+      <li><strong>Ibuprofen</strong> — kung walang gastric/kidney risk<div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Medicol (200mg, 400mg) · Advil (200mg)</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Interval · Max Bawat Araw</th></tr>
+          <tr><td class="al">Adults ≥18y</td><td>200mg muna · Pwedeng 400mg · Bawat 4–6 oras · Max 1,200mg/araw OTC · Kumain muna</td></tr>
+          <tr><td class="al">Elderly &gt;65y</td><td>200mg · Bawat 6–8 oras · Gamitin nang maingat</td></tr>
+          <tr><td class="al">Bata ≥6mo–12y</td><td>5–10mg/kg/dose · Bawat 6–8 oras · Gamitin ang pediatric syrup · I-refer para sa tamang weight-based dose</td></tr>
+          <tr class="nr"><td colspan="2">❌ Bata &lt; 6 buwan: KONTRAINDIKADO · ❌ 3rd trimester ng pagbubuntis: KONTRAINDIKADO · ⚠ HUWAG kung may ulcer, kidney, o heart disease · Kumain muna</td></tr>
+        </table></div></li>
+    </ul>
+    <div class="sub">SIPON / BARADONG ILONG — MAY PARACETAMOL NA KASAMA</div>
+    <ul>
+      <li><strong>Antihistamine + Decongestant combos</strong><div class="brand"><div class="blbl">📦 PH OTC Brands (⚠ May Paracetamol na kasama)</div><div class="bnames">Bioflu · Neozep · Decolgen · Sinutab · Symdex-D</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis</th></tr>
+          <tr><td class="al">Adults ≥18y</td><td>1 tablet · Bawat 6–8 oras · Kasabay ng pagkain</td></tr>
+          <tr><td class="al">Bata 6–12y</td><td>½ tablet o gamitin ang pediatric formulation</td></tr>
+          <tr class="nr"><td colspan="2">⚠ May Paracetamol na kasama — HUWAG dagdagan ng Biogesic o ibang Paracetamol</td></tr>
+        </table></div></li>
+    </ul>
+    <div class="sub">TUYONG UBO (Walang plema)</div>
+    <ul>
+      <li><strong>Dextromethorphan HBr</strong> (Cough Suppressant)<div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Benylin DM · Robitussin DM · Vicks Formula 44 DM</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Max Bawat Araw</th></tr>
+          <tr><td class="al">Adults/≥12y</td><td>10–20mg · Bawat 4 oras · o 30mg · Bawat 6–8 oras · Max 120mg/araw</td></tr>
+          <tr><td class="al">Bata 6–11y</td><td>5–10mg · Bawat 4 oras · Max 60mg/araw</td></tr>
+          <tr><td class="al">Bata 2–5y</td><td>2.5–5mg · Bawat 4 oras · Gamitin ang liquid form</td></tr>
+          <tr class="nr"><td colspan="2">❌ Bata &lt; 2 taon: KONTRAINDIKADO · Para LAMANG sa tuyong ubo</td></tr>
+        </table></div></li>
+    </ul>
+    <div class="sub">UBONG MAY PLEMA — MUCOLYTIC O EXPECTORANT</div>
+    <ul>
+      <li><strong>Carbocisteine</strong> (Mucolytic — binabago ang kapal ng plema)<div class="brand"><div class="blbl">📦 PH OTC Brand</div><div class="bnames">Solmux (375mg/500mg capsule) · Solmux Kids syrup</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Frequency</th></tr>
+          <tr><td class="al">Adults ≥18y</td><td>375–500mg · 3× araw</td></tr>
+          <tr><td class="al">Bata 6–12y</td><td>250mg (5ml syrup 50mg/ml) · 3× araw</td></tr>
+          <tr><td class="al">Bata 2–5y</td><td>62.5–125mg · 3× araw · Solmux Kids syrup</td></tr>
+          <tr class="nr"><td colspan="2">❌ Bata &lt; 2 taon: I-REFER · ⚠ Uminom ng maraming tubig</td></tr>
+        </table></div></li>
+    </ul>
+    <div class="warn">HUWAG pagsabayin ang Dextromethorphan at Carbocisteine/Ambroxol</div>
+  </div></div>
+  <div class="sec supp"><div class="sh">✅ Supportive Care</div><div class="sb"><ul>
+    <li>Sapat na pahinga</li><li>Maraming mainit na inumin — tubig, tsaa, sabaw</li><li>Mag-mask kung may ubo o sipon para hindi makahawa</li>
+  </ul></div></div>
+</div>
+</div>
+<div class="cfoot"><div class="cfi"><strong>⚠ Hindi ito diagnostic tool.</strong> Para sa MediQuinn Pharmacy staff internal use lamang. · All medications listed are OTC (over-the-counter) — walang reseta na kailangan.</div><div class="cfi"><strong>Trusted Care, Right Around the Corner</strong> · mediquinnpharmacy@gmail.com</div></div>
+</div>
+
+<!-- ═══ CHART 04 — DIARRHEA ═══ -->
+<div class="chart" id="c04">
+<div class="ch"><div><div class="ch-num">Chart 04 of 17</div><div class="ch-title">Diarrhea · LBM · Pagtatae</div><div class="ch-sub">Acute Diarrhea — Internal Dispensing Flowchart</div></div><div class="ch-badge">✅ OTC Only</div></div>
+<div class="start"><div class="start-t">START: Pasyente na may Diarrhea / LBM</div><div class="start-q">Kailan nagsimula? Ilang beses sa isang araw? · May lagnat, dugo sa dumi, o pagsusuka ba?</div></div>
+<div class="dec"><div class="dl dl-r"></div><div class="diamond d-r"><span class="d-sm">Red Flags?</span>YES</div><div class="dl dl-m"></div><div class="diamond d-g"><span class="d-sm">Red Flags?</span>NO</div><div class="dl dl-g"></div></div>
+<div class="cols">
+<div class="col">
+  <div class="sec rf"><div class="sh">🚩 Red Flags — I-Refer Agad</div><div class="sb"><ul>
+    <li>May dugo o itim na dumi</li><li>Lagnat ≥ 38.5°C</li><li>Matinding pananakit ng tiyan</li><li>Paulit-ulit na pagsusuka — hindi makainom</li><li>Signs ng dehydration: tuyong bibig, bihirang ihi, hilo</li><li>Diarrhea &gt; 3 araw na hindi gumagaling</li>
+  </ul></div></div>
+  <div class="sec ref"><div class="sh">⚕ I-Refer sa Pharmacist / Doctor AGAD</div><div class="sb"><ul>
+    <li>Buntis o pinanghihinalaang buntis</li><li><strong>Bata &lt; 6 taong gulang</strong> o Senior citizen</li><li>May diabetes, kidney, o heart disease</li><li>Immunocompromised</li><li>Galing sa travel + may lagnat o dugo sa dumi</li>
+  </ul></div></div>
+  <div class="sec paal"><div class="sh">📢 Paalala sa Pasyente</div><div class="sb"><ul>
+    <li><strong>ORS ang pinakamahalaga</strong> — mas kailangan ang fluids kaysa gamot</li><li>Kung hindi gumaan sa 24–48 oras, magpatingin</li><li>Kung may dugo o dehydration — ER agad</li><li>Ipagpatuloy ang ORS kahit humupa na ang diarrhea</li>
+  </ul></div></div>
+  <div class="sec strict"><div class="sh">🚫 Strict Reminders</div><div class="sb">
+    <div class="nodo">NO ANTIBIOTICS — Rx lamang</div>
+    <div class="nodo">NO LOPERAMIDE kung may dugo o lagnat</div>
+    <div class="nodo">NO LOPERAMIDE sa bata &lt; 6 taong gulang — KONTRAINDIKADO</div>
+    <div class="nodo">NO ASSUMPTION NA "LBM LANG"</div>
+  </div></div>
+  <div class="sec inote"><div class="sh">📋 Internal Note — Staff Only</div><div class="sb"><ul>
+    <li>ORS = pinaka-importanteng gamot sa diarrhea</li><li>Loperamide = pinipigilan ang diarrhea, <strong>hindi lunas sa impeksyon</strong></li><li>Persistent = referral, hindi repeat sale</li>
+  </ul></div></div>
+</div>
+<div class="col">
+  <div class="sec assess"><div class="sh">🔍 Assess Likely Type</div><div class="sb">
+    <div class="sub">ACUTE WATERY DIARRHEA (Mild)</div><ul><li>Tubig o malambot ang dumi · Walang dugo · Walang mataas na lagnat</li></ul>
+    <div class="sub">DIARRHEA WITH CRAMPS</div><ul><li>May pasumpong na pananakit · Gumagaan pagkatapos dumumi</li></ul>
+    <div class="sub">DIARRHEA SA BATA ≥ 6 TAON</div><ul><li>Walang dugo · Kayang uminom ng fluids</li></ul>
+  </div></div>
+  <div class="sec mgmt"><div class="sh">💊 OTC Management — Unahin ang ORS</div><div class="sb">
+    <div class="sub">HYDRATION — PANGUNAHING HAKBANG (OTC)</div>
+    <ul>
+      <li><strong>ORS (Oral Rehydration Salts)</strong><div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Hydrite sachets · Oresol sachets · Pedialyte</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Paano Gamitin</th></tr>
+          <tr><td class="al">Adults ≥18y</td><td>1 sachet sa 250ml MALINIS na tubig · 200–400ml pagkatapos ng bawat malusaw na dumi</td></tr>
+          <tr><td class="al">Bata 6–12y</td><td>50–100ml/kg sa loob ng 4 oras para sa mild dehydration</td></tr>
+          <tr><td class="al">Bata 2–5y</td><td>Pedialyte o Oresol · 50ml/kg sa 4 oras · Hatiin sa maliit na higop</td></tr>
+          <tr><td class="al">Sanggol / &lt; 2y</td><td>Ipagpatuloy ang breastfeeding + ORS · <strong>I-refer sa doktor agad</strong></td></tr>
+          <tr class="nw"><td colspan="2">⚠ Inumin paunti-unti pero madalas — huwag malaking higop nang sabay-sabay</td></tr>
+        </table></div></li>
+    </ul>
+    <div class="sub">PARA SA WATERY DIARRHEA — ADULTS / ≥ 6 TAON LAMANG</div>
+    <ul>
+      <li><strong>Loperamide HCl 2mg</strong><div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Diatabs (2mg) · Imodium (2mg)</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Max Bawat Araw</th></tr>
+          <tr><td class="al">Adults ≥18y</td><td>4mg (2 tabs) una · tapos 2mg pagkatapos ng bawat malusaw na dumi · Max 16mg/araw</td></tr>
+          <tr><td class="al">Bata 9–12y</td><td>2mg (1 tab) initial · tapos 1mg/10kg/dumi · Max 6mg/araw</td></tr>
+          <tr><td class="al">Bata 6–8y</td><td>1mg (½ tab) · 3× araw · Max 3mg/araw</td></tr>
+          <tr class="nr"><td colspan="2">❌ KONTRAINDIKADO sa bata &lt; 6 taon · ❌ HUWAG gamitin kung may dugo o lagnat</td></tr>
+        </table></div></li>
+    </ul>
+    <div class="sub">PARA SA STOMACH CRAMPS / SPASM</div>
+    <ul>
+      <li><strong>Hyoscine Butylbromide 10mg</strong><div class="brand"><div class="blbl">📦 PH OTC Brand</div><div class="bnames">Buscopan tablets (10mg)</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Max Bawat Araw</th></tr>
+          <tr><td class="al">Adults ≥18y</td><td>10–20mg (1–2 tabs) · Hanggang 5× araw · Max 100mg/araw</td></tr>
+          <tr><td class="al">Bata ≥ 6y</td><td>10mg (1 tab) · 3× araw · Max 30mg/araw</td></tr>
+          <tr class="nr"><td colspan="2">❌ Bata &lt; 6 taon: Rx lamang ang tamang form · ⚠ Iwasan kung may glaucoma, urinary retention, o myasthenia gravis</td></tr>
+        </table></div></li>
+    </ul>
+  </div></div>
+  <div class="sec supp"><div class="sh">✅ Supportive Care</div><div class="sb"><ul>
+    <li>BRAT diet: Banana, Rice, Applesauce, Toast (saging, kanin, mansanas, tinapay)</li><li>Iwas muna sa gatas, matamis, at mamantikang pagkain</li><li>Malinis na kamay at pagkain para maiwasan ang pagkalat</li>
+  </ul></div></div>
+</div>
+</div>
+<div class="cfoot"><div class="cfi"><strong>⚠ Hindi ito diagnostic tool.</strong> Para sa MediQuinn Pharmacy staff internal use lamang. · All medications listed are OTC (over-the-counter) — walang reseta na kailangan.</div><div class="cfi"><strong>Trusted Care, Right Around the Corner</strong> · mediquinnpharmacy@gmail.com</div></div>
+</div>
+
+<!-- ═══ CHART 05 — DRY COUGH ═══ -->
+<div class="chart" id="c05">
+<div class="ch"><div><div class="ch-num">Chart 05 of 17</div><div class="ch-title">Dry Cough · Tuyong Ubo</div><div class="ch-sub">Non-Productive Cough — Internal Dispensing Flowchart</div></div><div class="ch-badge">✅ OTC Only</div></div>
+<div class="start"><div class="start-t">START: Pasyente na may Tuyong Ubo (Walang Plema)</div><div class="start-q">Kailan nagsimula? May lagnat ba? · May sipon, hirap huminga, o sakit sa dibdib?</div></div>
+<div class="dec"><div class="dl dl-r"></div><div class="diamond d-r"><span class="d-sm">Red Flags?</span>YES</div><div class="dl dl-m"></div><div class="diamond d-g"><span class="d-sm">Red Flags?</span>NO</div><div class="dl dl-g"></div></div>
+<div class="cols">
+<div class="col">
+  <div class="sec rf"><div class="sh">🚩 Red Flags — I-Refer Agad</div><div class="sb"><ul>
+    <li>Ubo &gt; 7 araw na hindi gumagaling</li><li>Lagnat ≥ 38.5°C</li><li>Hirap huminga o chest pain</li><li>May dugo sa ubo</li><li>Ubo na lumalala sa gabi + wheezing</li><li>History ng hika, COPD, o TB</li><li>Ubo pagkatapos ng exposure sa TB patient</li>
+  </ul></div></div>
+  <div class="sec ref"><div class="sh">⚕ I-Refer sa Pharmacist / Doctor AGAD</div><div class="sb"><ul>
+    <li>Buntis o pinanghihinalaang buntis</li><li><strong>Bata &lt; 6 taong gulang</strong> o Senior citizen</li><li>May hika, TB, COPD</li><li>Umiinom ng <strong>ACE inhibitors</strong> — ito mismo ang maaaring dahilan ng ubo</li><li>Immunocompromised</li>
+  </ul></div></div>
+  <div class="sec paal"><div class="sh">📢 Paalala sa Pasyente</div><div class="sb"><ul>
+    <li>Kung hindi gumaling sa 3–5 araw, magpatingin</li><li>Kapag may plema na o lagnat — magpacheck agad</li><li>Huwag pagsabayin ang maraming cough meds</li>
+  </ul></div></div>
+  <div class="sec strict"><div class="sh">🚫 Strict Reminders</div><div class="sb">
+    <div class="nodo">NO ANTIBIOTICS OR STEROIDS</div>
+    <div class="nodo">NO EXPECTORANTS para sa TUYONG UBO — para sa may plema lamang</div>
+    <div class="nodo">NO "UBO LANG YAN" assumptions</div>
+  </div></div>
+  <div class="sec inote"><div class="sh">📋 Internal Note — Staff Only</div><div class="sb"><ul>
+    <li>Tuyong ubo ≠ productive cough — <strong>magkaibang gamot</strong></li><li>ACE inhibitor cough = i-refer sa doktor para baguhin ang Rx — hindi ito OTC issue</li><li>Persistent cough = referral, hindi repeat sale</li>
+  </ul></div></div>
+</div>
+<div class="col">
+  <div class="sec assess"><div class="sh">🔍 Assess Likely Cause</div><div class="sb">
+    <div class="sub">IRRITATIVE / POST-VIRAL DRY COUGH</div><ul><li>Walang plema · Naiirita ang lalamunan · Mas malala sa gabi</li></ul>
+    <div class="sub">ALLERGY-RELATED DRY COUGH</div><ul><li>May sipon o bahing · Makati ang ilong/lalamunan · Walang lagnat</li></ul>
+    <div class="sub">ACID-RELATED COUGH (GERD)</div><ul><li>Mas malala kapag nakahiga · May hapdi sa dibdib o maasim na pakiramdam</li></ul>
+  </div></div>
+  <div class="sec mgmt"><div class="sh">💊 OTC Management Based on Cause</div><div class="sb">
+    <div class="sub">IRRITATIVE / POST-VIRAL DRY COUGH</div>
+    <ul>
+      <li><strong>Dextromethorphan HBr</strong> (Cough Suppressant)<div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Benylin DM · Robitussin DM · Vicks Formula 44 DM</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Max Bawat Araw</th></tr>
+          <tr><td class="al">Adults/≥12y</td><td>10–20mg · Bawat 4 oras · o 30mg · Bawat 6–8 oras · Max 120mg/araw</td></tr>
+          <tr><td class="al">Bata 6–11y</td><td>5–10mg · Bawat 4 oras · Max 60mg/araw</td></tr>
+          <tr><td class="al">Bata 2–5y</td><td>2.5–5mg · Bawat 4 oras · Liquid form lamang</td></tr>
+          <tr class="nr"><td colspan="2">❌ Bata &lt; 2 taon: KONTRAINDIKADO · Para LAMANG sa tuyong ubo</td></tr>
+        </table></div></li>
+      <li><strong>Throat Lozenges</strong><div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Strepsils (iba't ibang flavor) · Difflam C lozenges</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Max Bawat Araw</th></tr>
+          <tr><td class="al">Adults/≥12y</td><td>1 lozenge · Bawat 2–3 oras · Max 8/araw · Hayaang matunaw nang dahan-dahan</td></tr>
+          <tr><td class="al">Bata 6–11y</td><td>1 lozenge · Bawat 3–4 oras · Max 5/araw · May adult supervision</td></tr>
+          <tr class="nr"><td colspan="2">❌ Bata &lt; 6 taon: CHOKING HAZARD — hindi angkop</td></tr>
+        </table></div></li>
+    </ul>
+    <div class="sub">ALLERGY-RELATED DRY COUGH — ANTIHISTAMINE (OTC)</div>
+    <ul>
+      <li><strong>Loratadine 10mg</strong> — hindi nakaka-antok · preferred sa araw<div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Allerta (10mg) · Claritin (10mg)</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Frequency</th></tr>
+          <tr><td class="al">Adults/≥12y</td><td>10mg · 1× araw</td></tr>
+          <tr><td class="al">Bata 6–11y</td><td>5mg (½ tab o syrup) · 1× araw</td></tr>
+          <tr><td class="al">Bata 2–5y</td><td>5mg (syrup) · 1× araw</td></tr>
+          <tr class="nr"><td colspan="2">❌ Bata &lt; 2 taon: I-REFER sa doktor</td></tr>
+        </table></div></li>
+      <li><strong>Cetirizine 10mg</strong> — maaaring nakaka-antok<div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Virlix (10mg) · Zyrtec (10mg)</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Frequency</th></tr>
+          <tr><td class="al">Adults/≥12y</td><td>5–10mg · 1× araw gabi · Sensitive/Elderly: magsimula sa 5mg</td></tr>
+          <tr><td class="al">Elderly &gt;65y</td><td>5mg · 1× araw — mas sensitive sa side effects</td></tr>
+          <tr><td class="al">Bata 6–11y</td><td>5mg · 1× araw</td></tr>
+          <tr><td class="al">Bata 2–5y</td><td>2.5mg · 2× araw O 5mg · 1× araw (syrup)</td></tr>
+          <tr class="nr"><td colspan="2">❌ Bata &lt; 2 taon: I-REFER · ⚠ Nakaka-antok — huwag magmaneho</td></tr>
+        </table></div></li>
+    </ul>
+    <div class="sub">ACID-RELATED COUGH (GERD) — ANTACID (OTC)</div>
+    <ul>
+      <li><strong>Antacid</strong><div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Kremil-S · Maalox · Gaviscon</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Timing</th></tr>
+          <tr><td class="al">Adults/≥12y</td><td>Kremil-S: 1–2 tabs NGUYAIN · <strong>1 oras pagkatapos kumain o kapag may hapdi</strong> at bago matulog · Max 12 tabs/araw · Max 2 linggo</td></tr>
+          <tr><td class="al">Bata 6–11y</td><td>½ dosis ng adult · May adult supervision</td></tr>
+          <tr class="nw"><td colspan="2">⚠ Iwasan maanghang, mamantika, kape, at alkohol para sa GERD · Huwag humiga agad pagkatapos kumain</td></tr>
+        </table></div></li>
+    </ul>
+  </div></div>
+  <div class="sec supp"><div class="sh">✅ Supportive Care</div><div class="sb"><ul>
+    <li>Maraming mainit na inumin — tubig, tsaa, sabaw</li><li>Pahinga ang boses — huwag sigawan o magsalita nang matagal</li><li>Humidified air kung available</li><li>Para sa GERD: huwag humiga agad pagkatapos kumain — maghintay ng 2–3 oras</li>
+  </ul></div></div>
+</div>
+</div>
+<div class="cfoot"><div class="cfi"><strong>⚠ Hindi ito diagnostic tool.</strong> Para sa MediQuinn Pharmacy staff internal use lamang. · All medications listed are OTC (over-the-counter) — walang reseta na kailangan.</div><div class="cfi"><strong>Trusted Care, Right Around the Corner</strong> · mediquinnpharmacy@gmail.com</div></div>
+</div>
+
+<!-- ═══ CHART 06 — HEADACHE ═══ -->
+<div class="chart" id="c06">
+<div class="ch"><div><div class="ch-num">Chart 06 of 17</div><div class="ch-title">Headache · Sakit ng Ulo</div><div class="ch-sub">Cephalgia — Internal Dispensing Flowchart</div></div><div class="ch-badge">✅ OTC Only</div></div>
+<div class="start"><div class="start-t">START: Pasyente na may Sakit ng Ulo</div><div class="start-q">Kailan nagsimula? Saan banda ang sakit? · May lagnat, hilo, pagsusuka, o panlalabo ng paningin ba?</div></div>
+<div class="dec"><div class="dl dl-r"></div><div class="diamond d-r"><span class="d-sm">Red Flags?</span>YES</div><div class="dl dl-m"></div><div class="diamond d-g"><span class="d-sm">Red Flags?</span>NO</div><div class="dl dl-g"></div></div>
+<div class="cols">
+<div class="col">
+  <div class="sec rf"><div class="sh">🚩 Red Flags — I-Refer / ER Agad</div><div class="sb"><ul>
+    <li><strong>"Thunderclap"</strong> — biglaan at pinakamasakit sa buhay</li><li>May pamamanhid, panghihina, o slurred speech</li><li>Nalalabo o doble ang paningin</li><li>May paninigas ng leeg + lagnat</li><li>Paulit-ulit na pagsusuka</li><li>Pagkatapos ng head injury</li><li>Gumigising sa pagtulog dahil sa sakit ng ulo</li><li>Lumalala at &gt; 3 araw na tuloy-tuloy</li>
+  </ul></div></div>
+  <div class="sec ref"><div class="sh">⚕ I-Refer sa Pharmacist / Doctor AGAD</div><div class="sb"><ul>
+    <li>Buntis o pinanghihinalaang buntis</li><li><strong>Bata &lt; 12 taong gulang</strong></li><li>Senior citizen</li><li>May altapresyon, diabetes, sakit sa puso</li><li>May stroke history · First-time severe headache</li>
+  </ul></div></div>
+  <div class="sec paal"><div class="sh">📢 Paalala sa Pasyente</div><div class="sb"><ul>
+    <li>Kung hindi gumaan sa 24–48 oras, magpatingin</li><li>Kung may neurological signs — ER agad</li><li><strong>Iwasan ang araw-araw na paggamit ng pain reliever</strong> — maaaring maging "medication overuse headache"</li>
+  </ul></div></div>
+  <div class="sec strict"><div class="sh">🚫 Strict Reminders</div><div class="sb">
+    <div class="nodo">NO ANTIBIOTICS OR STEROIDS</div>
+    <div class="nodo">NO PAGSASABAY ng dalawang NSAIDs</div>
+    <div class="nodo">NO DAILY PAIN RELIEVER nang walang doktor</div>
+    <div class="nodo">NO ASPIRIN para sa bata &lt; 16y — REYE'S SYNDROME RISK</div>
+  </div></div>
+  <div class="sec inote"><div class="sh">📋 Internal Note — Staff Only</div><div class="sb"><ul>
+    <li>Aspirin = <strong>HINDI inirerekomenda para sa bata &lt; 16 taon</strong> kahit OTC — Reye's syndrome risk</li><li>Ibuprofen ay mas epektibo kaysa Paracetamol para sa migraine</li>
+  </ul></div></div>
+</div>
+<div class="col">
+  <div class="sec assess"><div class="sh">🔍 Assess Likely Type</div><div class="sb">
+    <div class="sub">TENSION-TYPE (Pinakakaraniwan)</div><ul><li>Banayad hanggang katamtaman · Parang may pumipisil · Walang pagsusuka · Kaugnay ng stress o puyat</li></ul>
+    <div class="sub">MIGRAINE (Mild–Moderate)</div><ul><li>Isang side lang kumukirot · Sensitibo sa liwanag o ingay · May pagduduwal</li></ul>
+    <div class="sub">HEADACHE NA MAY SIPON / LAGNAT</div><ul><li>May colds/flu symptoms · Buong ulo o noo ang masakit</li></ul>
+  </div></div>
+  <div class="sec mgmt"><div class="sh">💊 OTC Management — Simulan sa Pinakamababang Epektibong Dosis</div><div class="sb">
+    <div class="sub">TENSION-TYPE — PILIIN LANG ANG ISA</div>
+    <ul>
+      <li><strong>Paracetamol</strong> — una-unahang subukan · pinaka-ligtas<div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Biogesic (500mg) · Tempra (500mg) · Calpol · Panadol</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Interval · Max Bawat Araw</th></tr>
+          <tr><td class="al">Adults ≥18y</td><td>500mg–1g · Bawat 4–6 oras · Max 4g/araw</td></tr>
+          <tr><td class="al">Elderly &gt;65y</td><td>500mg · Bawat 6 oras · Max 2–3g/araw</td></tr>
+          <tr><td class="al">Bata 12–17y</td><td>500mg–1g · Bawat 4–6 oras · Max 4g/araw</td></tr>
+          <tr class="nr"><td colspan="2">⚠ Max 5 doses/24h · Huwag pagsabayin sa combo products</td></tr>
+        </table></div></li>
+      <li><strong>Ibuprofen</strong> — mas epektibo para sa migraine at inflammatory<div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Medicol (200mg, 400mg) · Advil (200mg)</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Interval · Max Bawat Araw</th></tr>
+          <tr><td class="al">Adults ≥18y</td><td>200mg muna · Pwedeng 400mg · Bawat 4–6 oras · Max 1,200mg/araw OTC · Kumain muna</td></tr>
+          <tr><td class="al">Elderly &gt;65y</td><td>200mg · Bawat 6–8 oras · Gamitin nang maingat</td></tr>
+          <tr class="nr"><td colspan="2">❌ 3rd trimester ng pagbubuntis: KONTRAINDIKADO · ⚠ HUWAG kung may ulcer, kidney, o heart disease · Kumain muna</td></tr>
+        </table></div></li>
+      <li><strong>Mefenamic Acid</strong> — para sa adults at ≥14y lamang<div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Ponstan (500mg) · Dolfenal (500mg) · Mefenamic acid 250mg capsule (generic)</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Interval · Max Tagal</th></tr>
+          <tr><td class="al">Adults/≥14y</td><td>Simulan sa 250mg capsule · Pwedeng 500mg kung hindi sapat · Bawat 6–8 oras · Max 7 araw nang walang doktor · <strong>LAGING KUMAIN MUNA</strong></td></tr>
+          <tr class="nr"><td colspan="2">❌ Bata &lt; 14 taon: KONTRAINDIKADO · ❌ Kung may ulcer, kidney disease, o buntis: KONTRAINDIKADO</td></tr>
+        </table></div></li>
+    </ul>
+    <div class="warn">PILIIN LANG ANG ISA — HUWAG pagsabayin ang dalawang NSAIDs (Ibuprofen + Mefenamic)</div>
+    <div class="sub">HEADACHE NA MAY SIPON / LAGNAT — OTC COMBO</div>
+    <ul>
+      <li><strong>Paracetamol + Antihistamine combos</strong><div class="brand"><div class="blbl">📦 PH OTC Brands (⚠ May Paracetamol na kasama)</div><div class="bnames">Neozep Forte · Bioflu · Decolgen · Sinutab</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis</th></tr>
+          <tr><td class="al">Adults ≥18y</td><td>1 tablet · Bawat 6–8 oras · Kasabay ng pagkain</td></tr>
+          <tr><td class="al">Bata 6–12y</td><td>½ tablet o gamitin ang pediatric form · i-refer sa doktor</td></tr>
+          <tr class="nr"><td colspan="2">⚠ May Paracetamol na kasama — HUWAG dagdagan ng Biogesic</td></tr>
+        </table></div></li>
+    </ul>
+  </div></div>
+  <div class="sec supp"><div class="sh">✅ Supportive Care</div><div class="sb"><ul>
+    <li>Sapat na tulog at pahinga</li><li>Maraming tubig — maaaring dehydration ang sanhi</li><li>Iwas puyat, stress, at matagal na pagkagutom</li><li>Cold o warm compress sa noo</li>
+  </ul></div></div>
+</div>
+</div>
+<div class="cfoot"><div class="cfi"><strong>⚠ Hindi ito diagnostic tool.</strong> Para sa MediQuinn Pharmacy staff internal use lamang. · All medications listed are OTC (over-the-counter) — walang reseta na kailangan.</div><div class="cfi"><strong>Trusted Care, Right Around the Corner</strong> · mediquinnpharmacy@gmail.com</div></div>
+</div>
+
+<!-- ═══ CHART 07 — DIZZINESS ═══ -->
+<div class="chart" id="c07">
+<div class="ch"><div><div class="ch-num">Chart 07 of 17</div><div class="ch-title">Dizziness · Motion Sickness · Hilo</div><div class="ch-sub">Vertigo / Motion Sickness — Internal Dispensing Flowchart</div></div><div class="ch-badge">✅ OTC Only</div></div>
+<div class="start"><div class="start-t">START: Pasyente na Nahihilo</div><div class="start-q">Kailan nagsimula? Paikot ba ang pakiramdam o nasusuka? · May biyahe ba (kotse, bus, barko)?</div></div>
+<div class="dec"><div class="dl dl-r"></div><div class="diamond d-r"><span class="d-sm">Red Flags?</span>YES</div><div class="dl dl-m"></div><div class="diamond d-g"><span class="d-sm">Red Flags?</span>NO</div><div class="dl dl-g"></div></div>
+<div class="cols">
+<div class="col">
+  <div class="sec rf"><div class="sh">🚩 Red Flags — I-Refer / ER Agad</div><div class="sb"><ul>
+    <li>Biglaang hilo + pamamanhid, panghihina, o slurred speech</li><li>Nalalabo ang paningin o double vision</li><li>Matinding sakit ng ulo kasabay ng hilo</li><li>Hilo + chest pain o hirap huminga</li><li>Nahimatay o muntik mawalan ng malay</li><li>Paulit-ulit na pagsusuka</li><li>Hilo pagkatapos ng head injury</li>
+  </ul></div></div>
+  <div class="sec ref"><div class="sh">⚕ I-Refer sa Pharmacist / Doctor AGAD</div><div class="sb"><ul>
+    <li>Buntis o pinanghihinalaang buntis</li><li><strong>Bata &lt; 12 taong gulang</strong> para sa Meclizine · <strong>Bata &lt; 5 taon</strong> para sa Cinnarizine</li><li>Senior citizen</li><li>May altapresyon, diabetes, sakit sa puso</li><li>May stroke history · May ear infection na may lagnat</li>
+  </ul></div></div>
+  <div class="sec paal"><div class="sh">📢 Paalala sa Pasyente</div><div class="sb"><ul>
+    <li><strong>Huwag magmaneho</strong> pagkatapos uminom ng anti-vertigo meds — nakaka-antok</li><li>Kung hindi gumaan sa 24–48 oras, magpatingin</li><li>Kung paulit-ulit ang vertigo — i-refer sa doktor</li>
+  </ul></div></div>
+  <div class="sec strict"><div class="sh">🚫 Strict Reminders</div><div class="sb">
+    <div class="nodo">NO ANTIBIOTICS OR STEROIDS</div>
+    <div class="nodo">NO ASSUMPTION NA "HILO LANG"</div>
+    <div class="nodo">NO REPEAT SALE kung paulit-ulit ang symptoms</div>
+  </div></div>
+  <div class="sec inote"><div class="sh">📋 Internal Note — Staff Only</div><div class="sb"><ul>
+    <li>Neurological signs + hilo = ER referral <strong>kaagad</strong></li><li>BPPV ay maaaring kailanganin ng Epley maneuver mula sa doktor — OTC lang hindi sapat para sa recurrent vertigo</li>
+  </ul></div></div>
+</div>
+<div class="col">
+  <div class="sec assess"><div class="sh">🔍 Assess Likely Type</div><div class="sb">
+    <div class="sub">MOTION SICKNESS</div><ul><li>Hilo/nasusuka habang bumibiyahe · Gumagaan kapag huminto ang galaw</li></ul>
+    <div class="sub">BENIGN POSITIONAL VERTIGO (BPPV)</div><ul><li>Paikot na pakiramdam · Lumalala kapag binago ang posisyon ng ulo · Walang neurological signs</li></ul>
+    <div class="sub">LIGHTHEADEDNESS</div><ul><li>Parang mahihimatay · Kaugnay ng gutom, dehydration, o puyat</li></ul>
+  </div></div>
+  <div class="sec mgmt"><div class="sh">💊 OTC Management Based on Cause</div><div class="sb">
+    <div class="sub">MOTION SICKNESS O BPPV — PILIIN ANG ISA</div>
+    <ul>
+      <li><strong>Meclizine HCl 25mg</strong> — OTC para sa ≥12y lamang<div class="brand"><div class="blbl">📦 PH OTC Brand</div><div class="bnames">Bonamine (Meclizine HCl 25mg)</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Paano Gamitin</th></tr>
+          <tr><td class="al">Adults/≥12y</td><td>Motion sickness: 25mg · 1 oras BAGO bumiyahe · 1× araw lamang</td></tr>
+          <tr><td class="al">Vertigo</td><td>25–50mg/araw sa divided doses · Sensitive: 12.5mg (½ tab) muna</td></tr>
+          <tr><td class="al">Elderly &gt;65y</td><td>12.5mg (½ tab) muna · Mas sensitive sa antok at dizziness</td></tr>
+          <tr class="nr"><td colspan="2">❌ Bata &lt; 12 taon: I-REFER sa doktor · ⚠ Nakaka-antok — HUWAG magmaneho</td></tr>
+        </table></div></li>
+      <li><strong>Cinnarizine 25mg</strong> — OTC alternatibo<div class="brand"><div class="blbl">📦 PH OTC Brand</div><div class="bnames">Stugeron (Cinnarizine 25mg)</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Paano Gamitin</th></tr>
+          <tr><td class="al">Adults ≥18y</td><td>Vertigo: 25mg (1 tab) · 3× araw kasabay ng pagkain · Motion sickness: 25mg · 2 oras bago bumiyahe</td></tr>
+          <tr><td class="al">Bata 5–12y</td><td>12.5mg (½ tab) · 3× araw kasabay ng pagkain</td></tr>
+          <tr class="nr"><td colspan="2">❌ Bata &lt; 5 taon: KONTRAINDIKADO · ⚠ Nakaka-antok · Kumain kasabay ng gamot</td></tr>
+        </table></div></li>
+    </ul>
+    <div class="sub">LIGHTHEADEDNESS — HYDRATION MUNA (WALANG MEDICATION)</div>
+    <ul>
+      <li><strong>ORS o Isotonic drinks</strong><div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Hydrite · Oresol · Pocari Sweat · Gatorade</div>
+        <table class="dt"><tr><th>Edad</th><th>Paano Gamitin</th></tr>
+          <tr><td class="al">Lahat ng edad</td><td>Uminom nang sapat · Kumain kung gutom · Umupo o humiga muna bago tumayo</td></tr>
+          <tr class="nw"><td colspan="2">⚠ WALANG AUTOMATIC MEDICATION kung lightheadedness lamang — hydration at pahinga muna</td></tr>
+        </table></div></li>
+    </ul>
+  </div></div>
+  <div class="sec supp"><div class="sh">✅ Supportive Care</div><div class="sb"><ul>
+    <li>Iwasan ang biglang pagtayo — tumaas nang dahan-dahan</li><li>Mabagal na galaw ng ulo</li><li>Fresh air kung nasusuka habang nasa sasakyan</li><li>Huwag magbasa o gumamit ng phone habang nasa moving vehicle</li>
+  </ul></div></div>
+</div>
+</div>
+<div class="cfoot"><div class="cfi"><strong>⚠ Hindi ito diagnostic tool.</strong> Para sa MediQuinn Pharmacy staff internal use lamang. · All medications listed are OTC (over-the-counter) — walang reseta na kailangan.</div><div class="cfi"><strong>Trusted Care, Right Around the Corner</strong> · mediquinnpharmacy@gmail.com</div></div>
+</div>
+
+<!-- ═══ CHART 08 — SKIN IRRITATION ═══ -->
+<div class="chart" id="c08">
+<div class="ch"><div><div class="ch-num">Chart 08 of 17</div><div class="ch-title">Skin Irritation · Kati-Kati</div><div class="ch-sub">Allergic &amp; Contact Dermatitis — Internal Dispensing Flowchart</div></div><div class="ch-badge">✅ OTC Only</div></div>
+<div class="start"><div class="start-t">START: Pasyente na may Kati-Kati / Skin Irritation</div><div class="start-q">Kailan nagsimula? Saan banda? · May pantal, pamumula, sugat, o nana ba?</div></div>
+<div class="dec"><div class="dl dl-r"></div><div class="diamond d-r"><span class="d-sm">Red Flags?</span>YES</div><div class="dl dl-m"></div><div class="diamond d-g"><span class="d-sm">Red Flags?</span>NO</div><div class="dl dl-g"></div></div>
+<div class="cols">
+<div class="col">
+  <div class="sec rf"><div class="sh">🚩 Red Flags — I-Refer / ER Agad</div><div class="sb"><ul>
+    <li>Malawak na pantal sa buong katawan</li><li>Pamamaga ng mukha, labi, o talukap ng mata — <strong>possible anaphylaxis</strong></li><li>Hirap huminga o paninikip ng dibdib — <strong>ER agad</strong></li><li>May nana o signs ng infection</li><li>Biglaang pantal pagkatapos uminom ng bagong gamot</li><li>Kati-kati &gt; 2 linggo na hindi gumagaling</li>
+  </ul></div></div>
+  <div class="sec ref"><div class="sh">⚕ I-Refer sa Pharmacist / Doctor AGAD</div><div class="sb"><ul>
+    <li>Buntis o pinanghihinalaang buntis</li><li><strong>Bata &lt; 2 taong gulang</strong></li><li>Senior citizen</li><li>May diabetes, kidney, o liver disease · Immunocompromised</li><li>May history ng severe drug allergy</li><li>May chronic skin disease (psoriasis, eczema flare)</li>
+  </ul></div></div>
+  <div class="sec paal"><div class="sh">📢 Paalala sa Pasyente</div><div class="sb"><ul>
+    <li>Itigil ang suspected trigger (sabon, lotion, pagkain, alahas)</li><li>Iwasan kamutin — putulin ang mga kuko</li><li>Kung hindi gumaan sa 3–5 araw, magpatingin</li>
+  </ul></div></div>
+  <div class="sec strict"><div class="sh">🚫 Strict Reminders</div><div class="sb">
+    <div class="nodo">NO ANTIBIOTICS — hindi bacterial (kung walang impeksyon)</div>
+    <div class="nodo">NO STEROIDS — Rx lamang</div>
+    <div class="nodo">NO PAGSASABAY ng dalawang antihistamines</div>
+    <div class="nodo">NO ASSUMPTION NA "ALLERGY LANG"</div>
+  </div></div>
+  <div class="sec inote"><div class="sh">📋 Internal Note — Staff Only</div><div class="sb"><ul>
+    <li>Pamamaga ng labi/dila/lalamunan + hirap huminga = <strong>ANAPHYLAXIS — ER agad, hindi OTC issue</strong></li>
+  </ul></div></div>
+</div>
+<div class="col">
+  <div class="sec assess"><div class="sh">🔍 Assess Likely Cause</div><div class="sb">
+    <div class="sub">ALLERGIC / CONTACT DERMATITIS</div><ul><li>Biglaang kati pagkatapos ng trigger · Pamumula o pantal · Walang nana</li></ul>
+    <div class="sub">DRY SKIN / IRRITATION</div><ul><li>Balat tuyo at magaspang · Mas makati pagkatapos maligo</li></ul>
+    <div class="sub">INSECT BITES / LOCALIZED ITCH</div><ul><li>Isang bahagi lang · May kagat o bukol · Walang lagnat</li></ul>
+    <div class="sub">MILD SYSTEMIC ALLERGY</div><ul><li>Kati + sipon / bahing · Walang hirap huminga</li></ul>
+  </div></div>
+  <div class="sec mgmt"><div class="sh">💊 OTC Management Based on Cause</div><div class="sb">
+    <div class="sub">ALLERGIC / MILD ITCH — ORAL ANTIHISTAMINE (OTC)</div>
+    <ul>
+      <li><strong>Loratadine 10mg</strong> — preferred sa araw · hindi nakaka-antok<div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Allerta (10mg) · Claritin (10mg)</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Frequency</th></tr>
+          <tr><td class="al">Adults/≥12y</td><td>10mg · 1× araw</td></tr>
+          <tr><td class="al">Bata 6–11y</td><td>5mg (½ tab o syrup) · 1× araw</td></tr>
+          <tr><td class="al">Bata 2–5y</td><td>5mg (syrup) · 1× araw</td></tr>
+          <tr class="nr"><td colspan="2">❌ Bata &lt; 2 taon: I-REFER sa doktor</td></tr>
+        </table></div></li>
+      <li><strong>Cetirizine 10mg</strong> — mas matagal bisa · maaaring nakaka-antok<div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Virlix (10mg) · Zyrtec (10mg)</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Frequency</th></tr>
+          <tr><td class="al">Adults/≥12y</td><td>5–10mg · 1× araw gabi · Sensitive/Elderly: simulan sa 5mg</td></tr>
+          <tr><td class="al">Elderly &gt;65y</td><td>5mg · 1× araw — mas sensitive sa antok</td></tr>
+          <tr><td class="al">Bata 6–11y</td><td>5mg · 1× araw</td></tr>
+          <tr><td class="al">Bata 2–5y</td><td>2.5mg · 2× araw O 5mg · 1× araw (syrup)</td></tr>
+          <tr class="nr"><td colspan="2">❌ Bata &lt; 2 taon: I-REFER · ⚠ Nakaka-antok — huwag magmaneho</td></tr>
+        </table></div></li>
+    </ul>
+    <div class="sub">DRY SKIN — MOISTURIZER (OTC)</div>
+    <ul>
+      <li><strong>Fragrance-free moisturizer o emollient</strong><div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Cetaphil Moisturizing Lotion/Cream · Physiogel cream · Vaseline Intensive Care</div>
+        <table class="dt"><tr><th>Edad</th><th>Paano Gamitin</th></tr>
+          <tr><td class="al">Lahat ng edad ≥ 2y</td><td>Apply 2–3× araw · Gamitin habang basa pa ang balat para ma-lock ang moisture · Iwasan harsh soaps at mainit na tubig</td></tr>
+        </table></div></li>
+    </ul>
+    <div class="sub">INSECT BITES / LOCALIZED ITCH</div>
+    <ul><li>Cold compress sa lugar ng kagat</li><li>Oral antihistamine kung sobrang makati — tingnan ang doses sa itaas</li></ul>
+  </div></div>
+  <div class="sec supp"><div class="sh">✅ Supportive Care</div><div class="sb"><ul>
+    <li>Malamig o lukewarm na paligo — iwasan mainit na tubig</li><li>Iwas mabangong sabon at alcohol-based products</li><li>Magsuot ng maluwag at malambot na damit (cotton)</li>
+  </ul></div></div>
+</div>
+</div>
+<div class="cfoot"><div class="cfi"><strong>⚠ Hindi ito diagnostic tool.</strong> Para sa MediQuinn Pharmacy staff internal use lamang. · All medications listed are OTC (over-the-counter) — walang reseta na kailangan.</div><div class="cfi"><strong>Trusted Care, Right Around the Corner</strong> · mediquinnpharmacy@gmail.com</div></div>
+</div>
+
+<!-- ═══ CHART 09 — JOINT PAIN ═══ -->
+<div class="chart" id="c09">
+<div class="ch"><div><div class="ch-num">Chart 09 of 17</div><div class="ch-title">Joint Pain · Masakit na Kasu-Kasuan</div><div class="ch-sub">Musculoskeletal Pain — Internal Dispensing Flowchart</div></div><div class="ch-badge">✅ OTC Only</div></div>
+<div class="start"><div class="start-t">START: Pasyente na may Joint Pain</div><div class="start-q">Kailan nagsimula? Aling kasu-kasuan? · May pamamaga, pamumula, o paninigas ba?</div></div>
+<div class="dec"><div class="dl dl-r"></div><div class="diamond d-r"><span class="d-sm">Red Flags?</span>YES</div><div class="dl dl-m"></div><div class="diamond d-g"><span class="d-sm">Red Flags?</span>NO</div><div class="dl dl-g"></div></div>
+<div class="cols">
+<div class="col">
+  <div class="sec rf"><div class="sh">🚩 Red Flags — I-Refer Agad</div><div class="sb"><ul>
+    <li>Matinding sakit + biglaang pamamaga at pamumula</li><li>May lagnat — possible joint infection</li><li>Pagkatapos ng matinding injury o pagkabagsak</li><li>Hindi maigalaw ang kasu-kasuan</li><li>Biglaang sobrang sakit sa isang joint — possible gout</li><li>Pamamaga sa maraming joints + panghihina</li><li>Joint pain &gt; 2 linggo na lumalala</li>
+  </ul></div></div>
+  <div class="sec ref"><div class="sh">⚕ I-Refer sa Pharmacist / Doctor AGAD</div><div class="sb"><ul>
+    <li>Buntis o pinanghihinalaang buntis</li><li><strong>Bata &lt; 12 taong gulang</strong> o Senior citizen</li><li>May kidney, liver, o heart disease</li><li>May ulcer o GI bleeding history</li><li>May rheumatoid arthritis, gout, o lupus</li><li>Umiinom ng anticoagulants o steroids</li>
+  </ul></div></div>
+  <div class="sec paal"><div class="sh">📢 Paalala sa Pasyente</div><div class="sb"><ul>
+    <li>Iwasan tuloy-tuloy na paggamit ng pain reliever nang walang doktor</li><li>Kung hindi gumaan sa 3–5 araw, magpatingin</li><li>Gout at rheumatoid arthritis = doctor management — OTC ay pansamantala lamang</li>
+  </ul></div></div>
+  <div class="sec strict"><div class="sh">🚫 Strict Reminders</div><div class="sb">
+    <div class="nodo">NO STEROIDS WITHOUT PRESCRIPTION</div>
+    <div class="nodo">NO LONG-TERM NSAID USE nang walang medical check-up</div>
+    <div class="nodo">NO ASSUMPTION NA "RAYUMA LANG"</div>
+  </div></div>
+  <div class="sec inote"><div class="sh">📋 Internal Note — Staff Only</div><div class="sb"><ul>
+    <li>Flanax 275mg = OTC · Flanax 550mg = Rx — huwag papalitan</li><li>Diclofenac 1% topical gel = OTC · Pwede kasabay ng oral Paracetamol (iba't ibang mechanism)</li>
+  </ul></div></div>
+</div>
+<div class="col">
+  <div class="sec assess"><div class="sh">🔍 Assess Likely Cause</div><div class="sb">
+    <div class="sub">MUSCLE STRAIN / OVERUSE</div><ul><li>Sakit pagkatapos ng trabaho/ehersisyo · Gumagaan sa pahinga</li></ul>
+    <div class="sub">MILD OSTEOARTHRITIS</div><ul><li>Paninigas sa umaga (&lt; 30 min) · Sakit sa tuhod/balakang/kamay · Masakit kapag ginagamit</li></ul>
+    <div class="sub">MINOR INFLAMMATION</div><ul><li>Banayad na pamamaga · Walang lagnat</li></ul>
+  </div></div>
+  <div class="sec mgmt"><div class="sh">💊 OTC Pain Management — Simulan sa Pinakamababang Dosis</div><div class="sb">
+    <div class="sub">ORAL — PILIIN LANG ANG ISA</div>
+    <ul>
+      <li><strong>Paracetamol</strong> — una-unahang gamitin<div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Biogesic (500mg) · Tempra (500mg) · Calpol</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Interval · Max Bawat Araw</th></tr>
+          <tr><td class="al">Adults ≥18y</td><td>500mg–1g · Bawat 4–6 oras · Max 4g/araw</td></tr>
+          <tr><td class="al">Elderly &gt;65y</td><td>500mg · Bawat 6 oras · Max 2–3g/araw</td></tr>
+        </table></div></li>
+      <li><strong>Ibuprofen</strong> — anti-inflammatory<div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Medicol (200mg, 400mg) · Advil (200mg)</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Interval · Max Bawat Araw</th></tr>
+          <tr><td class="al">Adults ≥18y</td><td>200mg muna · Pwedeng 400mg · Bawat 4–6 oras · Max 1,200mg/araw OTC · Kumain muna</td></tr>
+          <tr><td class="al">Elderly &gt;65y</td><td>200mg · Bawat 6–8 oras · Gamitin nang maingat</td></tr>
+          <tr class="nr"><td colspan="2">❌ HUWAG kung may ulcer, kidney/heart disease, buntis, o on blood thinners</td></tr>
+        </table></div></li>
+      <li><strong>Naproxen Sodium 275mg</strong> — mas matagal bisa · 2–3× araw lamang<div class="brand"><div class="blbl">📦 PH OTC Brand</div><div class="bnames">Flanax (275mg) — OTC lamang ang 275mg; 550mg ay Rx</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Interval · Max Bawat Araw</th></tr>
+          <tr><td class="al">Adults ≥18y</td><td>275mg (1 tab) una · tapos 275mg · Bawat 6–8 oras · Max 825mg/araw OTC · Kumain muna</td></tr>
+          <tr class="nr"><td colspan="2">❌ Bata &lt; 12y: I-REFER nang walang doktor · ❌ HUWAG kung may kidney o GI disease</td></tr>
+        </table></div></li>
+    </ul>
+    <div class="sub">TOPICAL — OTC · PWEDE KASABAY NG ORAL PARACETAMOL</div>
+    <ul>
+      <li><strong>Diclofenac Sodium 1% gel</strong><div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Voltaren Emulgel (1%) · Cataflam gel · Diclogesic gel</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Paano Gamitin</th></tr>
+          <tr><td class="al">Adults/≥12y</td><td>2–4g (sukat ng cherry) sa masakit na joint · Lubusin sa pagkiskis · 3–4× araw · Hugasan ang kamay pagkatapos · Huwag takpan nang mahigpit</td></tr>
+          <tr class="nr"><td colspan="2">❌ Bata &lt; 12y: I-REFER · ❌ HUWAG sa open wound, mata, o mucous membranes</td></tr>
+        </table></div></li>
+    </ul>
+  </div></div>
+  <div class="sec supp"><div class="sh">✅ Supportive Care</div><div class="sb"><ul>
+    <li>Pahinga ang masakit na kasu-kasuan</li><li><strong>Cold compress</strong> — unang 48 oras (para sa pamamaga)</li><li><strong>Warm compress</strong> — pagkatapos ng 48 oras (para sa stiffness at chronic pain)</li><li>I-elevate ang affected limb kung may pamamaga</li>
+  </ul></div></div>
+</div>
+</div>
+<div class="cfoot"><div class="cfi"><strong>⚠ Hindi ito diagnostic tool.</strong> Para sa MediQuinn Pharmacy staff internal use lamang. · All medications listed are OTC (over-the-counter) — walang reseta na kailangan.</div><div class="cfi"><strong>Trusted Care, Right Around the Corner</strong> · mediquinnpharmacy@gmail.com</div></div>
+</div>
+
+<!-- ═══ CHART 10 — SINGAW ═══ -->
+<div class="chart" id="c10">
+<div class="ch"><div><div class="ch-num">Chart 10 of 17</div><div class="ch-title">Singaw · Mouth Ulcer</div><div class="ch-sub">Aphthous Ulcer — Internal Dispensing Flowchart</div></div><div class="ch-badge">✅ OTC Only</div></div>
+<div class="start"><div class="start-t">START: Pasyente na may Singaw</div><div class="start-q">Kailan nagsimula? Ilan at saan ang singaw? · Masakit ba kapag kumakain o nagsasalita?</div></div>
+<div class="dec"><div class="dl dl-r"></div><div class="diamond d-r"><span class="d-sm">Red Flags?</span>YES</div><div class="dl dl-m"></div><div class="diamond d-g"><span class="d-sm">Red Flags?</span>NO</div><div class="dl dl-g"></div></div>
+<div class="cols">
+<div class="col">
+  <div class="sec rf"><div class="sh">🚩 Red Flags — I-Refer Agad</div><div class="sb"><ul>
+    <li>Singaw &gt; 2 linggo na hindi naghihilom</li><li>Paulit-ulit at marami — madalas bumabalik</li><li>Malaki, malalim, o dumudugo</li><li>May lagnat o matinding panghihina</li><li>Puting patches na madaling matanggal — possible <strong>oral thrush</strong></li><li>Hirap lumunok o magsalita</li><li>Kasabay ng pagbaba ng timbang</li><li>Sugatang matigas o hindi masakit sa labi/dila — <strong>rule out malignancy</strong></li>
+  </ul></div></div>
+  <div class="sec ref"><div class="sh">⚕ I-Refer sa Pharmacist / Doctor AGAD</div><div class="sb"><ul>
+    <li>Buntis o pinanghihinalaang buntis</li><li><strong>Bata &lt; 6 taong gulang</strong> o Senior citizen</li><li>May diabetes o immunocompromised</li><li>May history ng cancer · Umiinom ng immunosuppressants</li>
+  </ul></div></div>
+  <div class="sec paal"><div class="sh">📢 Paalala sa Pasyente</div><div class="sb"><ul>
+    <li>Karaniwang singaw ay gumagaling sa loob ng <strong>7–10 araw</strong> nang kusa</li><li>Kung hindi gumaling sa 10–14 araw — magpatingin</li><li>Huwag tusukin o galawin ang singaw</li><li>OTC ay para sa pain relief lamang — hindi nagpapabilis ng healing</li>
+  </ul></div></div>
+  <div class="sec strict"><div class="sh">🚫 Strict Reminders</div><div class="sb">
+    <div class="nodo">NO ANTIBIOTICS OR STEROIDS</div>
+    <div class="nodo">NO ASSUMPTION — maaaring fungal (thrush) o malignant</div>
+    <div class="nodo">NO REPEAT SALE kung hindi gumagaling</div>
+  </div></div>
+  <div class="sec inote"><div class="sh">📋 Internal Note — Staff Only</div><div class="sb"><ul>
+    <li>OTC ay para sa pain relief lamang — hindi nagpapabilis ng healing ng singaw</li><li>Recurrent o large ulcers = medical referral</li>
+  </ul></div></div>
+</div>
+<div class="col">
+  <div class="sec assess"><div class="sh">🔍 Assess Likely Cause</div><div class="sb">
+    <div class="sub">SIMPLE APHTHOUS ULCER (Common Singaw)</div><ul><li>Maliit, bilog o oval · Maputi o dilaw ang gitna · Masakit kapag kumakain</li></ul>
+    <div class="sub">TRAUMA-RELATED</div><ul><li>Nakagat ang pisngi o dila · Matulis na ngipin, braces, o pustiso</li></ul>
+    <div class="sub">IRRITANT / TRIGGER-RELATED</div><ul><li>Stress, puyat · Toothpaste na may SLS · Maanghang/maasim/mainit na pagkain</li></ul>
+  </div></div>
+  <div class="sec mgmt"><div class="sh">💊 OTC Management</div><div class="sb">
+    <div class="sub">PAIN RELIEF — ORAL OTC</div>
+    <ul>
+      <li><strong>Paracetamol</strong> — para sa sakit lamang<div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Biogesic (500mg) · Tempra (500mg) · Calpol</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Frequency</th></tr>
+          <tr><td class="al">Adults ≥18y</td><td>500mg · Bawat 4–6 oras kung masakit · Max 4g/araw</td></tr>
+          <tr><td class="al">Elderly &gt;65y</td><td>500mg · Bawat 6 oras · Max 2–3g/araw</td></tr>
+          <tr><td class="al">Bata 6–12y</td><td>10–15mg/kg/dose · Bawat 4–6 oras · Gamitin ang syrup</td></tr>
+          <tr><td class="al">Bata 2–5y</td><td>10–15mg/kg/dose syrup · Bawat 4–6 oras · (approx. 80–160mg para sa 10–15kg na bata) · Gamitin ang may kasamang dosing cup</td></tr>
+          <tr class="nr"><td colspan="2">❌ Bata &lt; 3y: I-REFER sa doktor · Max 5 doses/24h</td></tr>
+        </table></div></li>
+    </ul>
+    <div class="sub">LOCAL ORAL CARE — OTC</div>
+    <ul>
+      <li><strong>Antiseptic Mouthwash</strong><div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Bactidol (Hexetidine 0.1%) · Betadine Gargle (Povidone-Iodine 1%) · Listerine Antiseptic</div>
+        <table class="dt"><tr><th>Edad</th><th>Paano Gamitin</th></tr>
+          <tr><td class="al">Adults/≥12y</td><td>Mag-gargle ng 30 segundo · 2–3× araw pagkatapos kumain · HUWAG lunukin · Huwag kumain/uminom sa loob ng 30 min pagkatapos</td></tr>
+          <tr><td class="al">Bata 6–11y</td><td>Gamitin ang diluted form · May adult supervision · HUWAG lunukin</td></tr>
+          <tr class="nr"><td colspan="2">❌ Bata &lt; 6 taon: HINDI angkop — hindi pa kayang pigilan ang paglunok</td></tr>
+        </table></div></li>
+    </ul>
+    <ul><li>Warm saltwater gargle — ½ kutsaritang asin + 1 basong mainit na tubig · 2–3× araw (adults at bata ≥ 6y)</li><li>Malambot na toothbrush · Malambot na pagkain</li></ul>
+    <div class="sub">NUTRITIONAL SUPPORT — OTC (Optional)</div>
+    <ul>
+      <li><strong>Vitamin C + Zinc</strong><div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Ceelin Plus (Vit C + Zinc) · Enervon-C · Stresstabs with Zinc</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis</th></tr>
+          <tr><td class="al">Adults ≥18y</td><td>Sundin ang label dosing · 1× araw kasabay ng pagkain</td></tr>
+          <tr><td class="al">Bata ≥ 2y</td><td>Gamitin ang pediatric formulation (Ceelin syrup) · Sundin ang label</td></tr>
+        </table></div></li>
+    </ul>
+  </div></div>
+  <div class="sec supp"><div class="sh">✅ Supportive Care</div><div class="sb"><ul>
+    <li>Iwasan ang mga trigger: stress, puyat, maanghang/maasim/mainit na pagkain</li><li>Subukan ang SLS-free toothpaste kung madalas magsingaw</li><li>Sapat na tulog at maayos na pagkain</li>
+  </ul></div></div>
+</div>
+</div>
+<div class="cfoot"><div class="cfi"><strong>⚠ Hindi ito diagnostic tool.</strong> Para sa MediQuinn Pharmacy staff internal use lamang. · All medications listed are OTC (over-the-counter) — walang reseta na kailangan.</div><div class="cfi"><strong>Trusted Care, Right Around the Corner</strong> · mediquinnpharmacy@gmail.com</div></div>
+</div>
+
+<!-- ═══ CHART 11 — SORE THROAT ═══ -->
+<div class="chart" id="c11">
+<div class="ch"><div><div class="ch-num">Chart 11 of 17</div><div class="ch-title">Sore Throat · Sakit ng Lalamunan</div><div class="ch-sub">Pharyngitis — Internal Dispensing Flowchart</div></div><div class="ch-badge">✅ OTC Only</div></div>
+<div class="start"><div class="start-t">START: Pasyente na may Masakit na Lalamunan</div><div class="start-q">Kailan nagsimula? May lagnat ba? · May ubo, sipon, o hirap lumunok?</div></div>
+<div class="dec"><div class="dl dl-r"></div><div class="diamond d-r"><span class="d-sm">Red Flags?</span>YES</div><div class="dl dl-m"></div><div class="diamond d-g"><span class="d-sm">Red Flags?</span>NO</div><div class="dl dl-g"></div></div>
+<div class="cols">
+<div class="col">
+  <div class="sec rf"><div class="sh">🚩 Red Flags — I-Refer Agad</div><div class="sb"><ul>
+    <li>Hirap lumunok o huminga</li><li>Matinding sakit na biglaan o lumalala</li><li>Lagnat ≥ 38.5°C</li><li>May nana o puting patches sa tonsils</li><li>Pamamaga ng leeg o panga</li><li>Sore throat &gt; 7 araw na hindi gumagaling</li>
+  </ul></div></div>
+  <div class="sec ref"><div class="sh">⚕ I-Refer sa Pharmacist / Doctor AGAD</div><div class="sb"><ul>
+    <li>Buntis o pinanghihinalaang buntis</li><li><strong>Bata &lt; 6 taong gulang</strong> o Senior citizen</li><li>May rheumatic heart disease · Immunocompromised</li><li>May history ng recurrent tonsillitis</li>
+  </ul></div></div>
+  <div class="sec paal"><div class="sh">📢 Paalala sa Pasyente</div><div class="sb"><ul>
+    <li>Karaniwang viral ang sore throat — gumagaling sa <strong>3–7 araw</strong></li><li>Kung hindi gumaling sa 3–5 araw, magpatingin</li>
+  </ul></div></div>
+  <div class="sec strict"><div class="sh">🚫 Strict Reminders</div><div class="sb">
+    <div class="nodo">NO ANTIBIOTICS — karaniwang viral</div>
+    <div class="nodo">NO STEROIDS — Rx lamang</div>
+    <div class="nodo">NO ASSUMPTION NA BACTERIAL AGAD</div>
+  </div></div>
+  <div class="sec inote"><div class="sh">📋 Internal Note — Staff Only</div><div class="sb"><ul>
+    <li>Karamihan ng sore throat ay viral — OTC = symptom relief lamang</li><li>Persistent, worsening, o purulent = referral para sa throat swab at antibiotics sa doktor</li>
+  </ul></div></div>
+</div>
+<div class="col">
+  <div class="sec assess"><div class="sh">🔍 Assess Likely Cause</div><div class="sb">
+    <div class="sub">VIRAL (Pinakakaraniwan)</div><ul><li>May sipon o ubo · Walang nana · Dahan-dahan ang sakit</li></ul>
+    <div class="sub">IRRITATION-RELATED</div><ul><li>Dahil sa usok, alikabok — maaaring may pamamaos · Walang lagnat</li></ul>
+    <div class="sub">ALLERGY-RELATED</div><ul><li>Makati ang lalamunan · May sipon o bahing · Walang lagnat</li></ul>
+  </div></div>
+  <div class="sec mgmt"><div class="sh">💊 OTC Management Based on Cause</div><div class="sb">
+    <div class="sub">PAIN & SYMPTOM RELIEF — PILIIN LANG ANG ISA</div>
+    <ul>
+      <li><strong>Paracetamol</strong><div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Biogesic (500mg) · Tempra · Calpol · Panadol</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Interval · Max Bawat Araw</th></tr>
+          <tr><td class="al">Adults ≥18y</td><td>500mg–1g · Bawat 4–6 oras · Max 4g/araw</td></tr>
+          <tr><td class="al">Elderly &gt;65y</td><td>500mg · Bawat 6 oras · Max 2–3g/araw</td></tr>
+          <tr><td class="al">Bata 6–12y</td><td>10–15mg/kg/dose · Bawat 4–6 oras · syrup</td></tr>
+          <tr><td class="al">Bata 2–5y</td><td>10–15mg/kg/dose syrup · Bawat 4–6 oras · (approx. 80–160mg para sa 10–15kg na bata) · Gamitin ang may kasamang dosing cup</td></tr>
+          <tr class="nr"><td colspan="2">❌ Bata &lt; 3y: I-REFER · Max 5 doses/24h</td></tr>
+        </table></div></li>
+      <li><strong>Ibuprofen</strong> — anti-inflammatory · epektibo para sa sore throat<div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Medicol (200mg) · Advil (200mg)</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Interval · Max Bawat Araw</th></tr>
+          <tr><td class="al">Adults ≥18y</td><td>200–400mg · Bawat 4–6 oras · Max 1,200mg/araw · Kumain muna</td></tr>
+          <tr><td class="al">Bata ≥6mo–12y</td><td>5–10mg/kg/dose · Bawat 6–8 oras · Gamitin ang pediatric syrup</td></tr>
+          <tr class="nr"><td colspan="2">❌ HUWAG kung may GI issues, kidney disease, o buntis</td></tr>
+        </table></div></li>
+    </ul>
+    <div class="sub">LOCAL THROAT RELIEF — OTC</div>
+    <ul>
+      <li><strong>Antiseptic Throat Lozenges</strong><div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Strepsils (iba't ibang flavor) · Difflam C · Bactidol lozenges</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Max Bawat Araw</th></tr>
+          <tr><td class="al">Adults/≥12y</td><td>1 lozenge · Bawat 2–3 oras · Max 8/araw · Hayaang matunaw nang dahan-dahan</td></tr>
+          <tr><td class="al">Bata 6–11y</td><td>1 lozenge · Bawat 3–4 oras · Max 5/araw · May adult supervision</td></tr>
+          <tr class="nr"><td colspan="2">❌ Bata &lt; 6 taon: CHOKING HAZARD</td></tr>
+        </table></div></li>
+    </ul>
+    <ul><li>Warm saltwater gargle — ½ kutsaritang asin + 1 basong mainit na tubig · 3–4× araw</li><li>Mainit na inumin — tubig, tsaa, sabaw</li></ul>
+    <div class="sub">ALLERGY-RELATED — OTC ANTIHISTAMINE</div>
+    <ul>
+      <li><strong>Loratadine o Cetirizine</strong> — tingnan ang age-grouped doses sa Chart 08<div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Allerta / Claritin (Loratadine 10mg) · Virlix / Zyrtec (Cetirizine 10mg)</div></div></li>
+    </ul>
+  </div></div>
+  <div class="sec supp"><div class="sh">✅ Supportive Care</div><div class="sb"><ul>
+    <li>Pahinga ang boses — huwag sigawan</li><li>Maraming mainit na inumin</li><li>Iwas malamig, maanghang, at maasim</li><li>Iwas usok at sigarilyo</li>
+  </ul></div></div>
+</div>
+</div>
+<div class="cfoot"><div class="cfi"><strong>⚠ Hindi ito diagnostic tool.</strong> Para sa MediQuinn Pharmacy staff internal use lamang. · All medications listed are OTC (over-the-counter) — walang reseta na kailangan.</div><div class="cfi"><strong>Trusted Care, Right Around the Corner</strong> · mediquinnpharmacy@gmail.com</div></div>
+</div>
+
+<!-- ═══ CHART 12 — STOMACH PAIN ═══ -->
+<div class="chart" id="c12">
+<div class="ch"><div><div class="ch-num">Chart 12 of 17</div><div class="ch-title">Stomach Pain · Sakit ng Tiyan</div><div class="ch-sub">Abdominal Pain / Hyperacidity — Internal Dispensing Flowchart</div></div><div class="ch-badge">✅ OTC Only</div></div>
+<div class="start"><div class="start-t">START: Pasyente na may Sakit ng Tiyan</div><div class="start-q">Kailan nagsimula? Saan banda ang sakit? · May pagsusuka, pagtatae, o lagnat ba?</div></div>
+<div class="dec"><div class="dl dl-r"></div><div class="diamond d-r"><span class="d-sm">Red Flags?</span>YES</div><div class="dl dl-m"></div><div class="diamond d-g"><span class="d-sm">Red Flags?</span>NO</div><div class="dl dl-g"></div></div>
+<div class="cols">
+<div class="col">
+  <div class="sec rf"><div class="sh">🚩 Red Flags — I-Refer / ER Agad</div><div class="sb"><ul>
+    <li>Matinding sakit na biglaan o lumalala</li><li>Sakit sa <strong>kanang ibaba ng tiyan</strong> — possible appendicitis</li><li>May dugo sa dumi o suka</li><li>Paulit-ulit na pagsusuka</li><li>May lagnat + matinding sakit</li><li>Matigas at masakit hawakan ang tiyan</li><li>Stomach pain &gt; 48 oras walang pagbago</li>
+  </ul></div></div>
+  <div class="sec ref"><div class="sh">⚕ I-Refer sa Pharmacist / Doctor AGAD</div><div class="sb"><ul>
+    <li>Buntis o pinanghihinalaang buntis</li><li><strong>Bata &lt; 6 taong gulang</strong> o Senior citizen</li><li>May diabetes / kidney / liver / ulcer / gallstones</li><li>Maraming maintenance meds</li>
+  </ul></div></div>
+  <div class="sec paal"><div class="sh">📢 Paalala sa Pasyente</div><div class="sb"><ul>
+    <li>Kung hindi gumaan sa 24–48 oras — magpatingin</li><li>Kung lumalala, may lagnat, o may dugo — ER agad</li><li>Huwag sabay-sabayin ang maraming gamot para sa tiyan</li>
+  </ul></div></div>
+  <div class="sec strict"><div class="sh">🚫 Strict Reminders</div><div class="sb">
+    <div class="nodo">NO ANTIBIOTICS OR STEROIDS</div>
+    <div class="nodo">NO LOPERAMIDE kung may dugo o lagnat</div>
+    <div class="nodo">NO PAINKILLERS para sa undiagnosed abdominal pain — maaaring matakpan ang tamang diagnosis</div>
+    <div class="nodo">NO ASSUMPTION NA "KABAG LANG"</div>
+  </div></div>
+  <div class="sec inote"><div class="sh">📋 Internal Note — Staff Only</div><div class="sb"><ul>
+    <li>Kremil-S = antacid (Al/Mg hydroxide) + simethicone — dalawa sa iisang produkto</li><li>Antacid = inumin <strong>1 oras pagkatapos kumain o kapag may hapdi</strong> at bago matulog · Famotidine (H2 blocker) = inumin <strong>30–60 minuto BAGO kumain</strong> o bago matulog</li>
+  </ul></div></div>
+</div>
+<div class="col">
+  <div class="sec assess"><div class="sh">🔍 Assess Dominant Symptoms</div><div class="sb">
+    <div class="sub">HYPERACIDITY / GERD</div><ul><li>Hapdi o burning sa sikmura · Lumalala pagkatapos kumain o kapag nakahiga · Maasim na pakiramdam</li></ul>
+    <div class="sub">GAS / BLOATING (KABAG)</div><ul><li>Pakiramdam puno o kabag · Gumagaan pagkatapos umutot</li></ul>
+    <div class="sub">MILD DIARRHEA-RELATED PAIN</div><ul><li>Malambot o watery stool · Walang dugo</li></ul>
+    <div class="sub">STOMACH CRAMPS / SPASM</div><ul><li>Pasumpong-sumpong na sakit · Nawawala at bumabalik</li></ul>
+  </div></div>
+  <div class="sec mgmt"><div class="sh">💊 OTC Management Based on Cause</div><div class="sb">
+    <div class="sub">HYPERACIDITY / GERD — ANTACID (OTC)</div>
+    <ul>
+      <li><strong>Antacid</strong> — agarang relief · Inumin 1 oras pagkatapos kumain o kapag may hapdi<div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Kremil-S (Al/Mg hydroxide + Simethicone) · Maalox · Gaviscon</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Timing · Max Bawat Araw</th></tr>
+          <tr><td class="al">Adults/≥12y</td><td>Kremil-S: 1–2 tabs · <strong>NGUYAIN MUNA</strong> · Inumin <strong>1 oras pagkatapos kumain o kapag may hapdi</strong> at bago matulog · Max 12 tabs/araw · Max 2 linggo</td></tr>
+          <tr><td class="al">Bata 6–11y</td><td>½ dosis ng adult · May adult supervision</td></tr>
+          <tr class="nw"><td colspan="2">⚠ Gaviscon: 2–4 tablets pagkatapos kumain at bago matulog · Huwag uminom ng tubig agad</td></tr>
+        </table></div></li>
+      <li><strong>Famotidine 20mg (H2 Blocker)</strong> — mas matagal bisa (8–12 oras) · Inumin BAGO kumain<div class="brand"><div class="blbl">📦 PH OTC Brand</div><div class="bnames">Kremil-S Advance (Famotidine 20mg)</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Timing · Max Bawat Araw</th></tr>
+          <tr><td class="al">Adults/≥12y</td><td>20mg (1 tab) · <strong>Bago kumain (30–60 min)</strong> o bago matulog · 2× araw · Max 40mg/araw OTC · Max 2 linggo nang walang doktor</td></tr>
+          <tr class="nr"><td colspan="2">❌ Bata &lt; 12 taon: I-REFER sa doktor</td></tr>
+        </table></div></li>
+    </ul>
+    <div class="sub">GAS / BLOATING — SIMETHICONE (OTC)</div>
+    <ul>
+      <li><strong>Simethicone</strong><div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Kremil-S (may Simethicone na kasama) · Flatuzyme · Gas-X</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Timing</th></tr>
+          <tr><td class="al">Adults/≥12y</td><td>40–125mg · Pagkatapos kumain at bago matulog</td></tr>
+          <tr><td class="al">Bata 2–11y</td><td>20–40mg · Pagkatapos kumain · Gamitin ang pediatric drops/syrup</td></tr>
+        </table></div></li>
+    </ul>
+    <div class="sub">STOMACH CRAMPS / SPASM — BUSCOPAN (OTC)</div>
+    <ul>
+      <li><strong>Hyoscine Butylbromide 10mg</strong><div class="brand"><div class="blbl">📦 PH OTC Brand</div><div class="bnames">Buscopan tablets (10mg)</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Frequency · Max Bawat Araw</th></tr>
+          <tr><td class="al">Adults ≥18y</td><td>10–20mg (1–2 tabs) · Hanggang 5× araw · Max 100mg/araw</td></tr>
+          <tr><td class="al">Bata ≥ 6y</td><td>10mg (1 tab) · 3× araw · Max 30mg/araw</td></tr>
+          <tr class="nr"><td colspan="2">❌ Bata &lt; 6 taon: Rx lamang ang tamang form · ⚠ Iwasan kung may glaucoma, urinary retention, o myasthenia gravis</td></tr>
+        </table></div></li>
+    </ul>
+  </div></div>
+  <div class="sec supp"><div class="sh">✅ Supportive Care</div><div class="sb"><ul>
+    <li>Maraming tubig at ORS kung may diarrhea</li><li>Malambot na pagkain — lugaw, saging, tinapay</li><li>Iwas muna sa mamantika, maanghang, gatas</li><li>Para sa GERD: huwag humiga agad pagkatapos kumain — maghintay ng 2–3 oras</li>
+  </ul></div></div>
+</div>
+</div>
+<div class="cfoot"><div class="cfi"><strong>⚠ Hindi ito diagnostic tool.</strong> Para sa MediQuinn Pharmacy staff internal use lamang. · All medications listed are OTC (over-the-counter) — walang reseta na kailangan.</div><div class="cfi"><strong>Trusted Care, Right Around the Corner</strong> · mediquinnpharmacy@gmail.com</div></div>
+</div>
+
+<!-- ═══ CHART 13 — MINOR WOUND ═══ -->
+<div class="chart" id="c13">
+<div class="ch"><div><div class="ch-num">Chart 13 of 17</div><div class="ch-title">Minor Wound · Sugat · Hiwa · Gasgas</div><div class="ch-sub">Minor Wound Care — Internal Dispensing Flowchart</div></div><div class="ch-badge">✅ OTC Only</div></div>
+<div class="start"><div class="start-t">START: Pasyente na may Minor Wound</div><div class="start-q">Kailan nangyari? Paano nangyari? Gaano kalalim? · May dugo, dumi, o pamamaga ba?</div></div>
+<div class="dec"><div class="dl dl-r"></div><div class="diamond d-r"><span class="d-sm">Red Flags?</span>YES</div><div class="dl dl-m"></div><div class="diamond d-g"><span class="d-sm">Red Flags?</span>NO</div><div class="dl dl-g"></div></div>
+<div class="cols">
+<div class="col">
+  <div class="sec rf"><div class="sh">🚩 Red Flags — I-Refer Agad</div><div class="sb"><ul>
+    <li>Malalim na sugat — kita ang taba o laman</li><li>Tuloy-tuloy o malakas na pagdurugo</li><li>Sugat mula sa kalawangin o maruming bagay</li><li>Kagat ng hayop o tao</li><li>May nana, pamumula, init, matinding sakit, o lagnat</li><li>Sugat hindi naghihilom &gt; 7 araw</li><li>Malaking sugat sa mukha, kamay, o kasu-kasuan</li>
+  </ul></div></div>
+  <div class="sec ref"><div class="sh">⚕ I-Refer sa Pharmacist / Doctor AGAD</div><div class="sb"><ul>
+    <li>Buntis o pinanghihinalaang buntis</li><li><strong>Bata &lt; 2 taong gulang</strong> o Senior citizen</li><li>May diabetes o immunocompromised</li><li>May bleeding disorder o on blood thinners</li><li><strong>Hindi updated sa tetanus vaccination</strong></li><li>Malaking sugat o deep puncture wound</li>
+  </ul></div></div>
+  <div class="sec paal"><div class="sh">📢 Paalala sa Pasyente</div><div class="sb"><ul>
+    <li>Kung mamula, sumakit, mamaga, o mag-nana → magpatingin</li><li>Kung hindi naghihilom sa 5–7 araw — magpacheck</li><li>Kung walang tetanus shot sa nakaraang 5–10 taon — magpabakuna (anti-tetanus injection = Rx/clinic procedure)</li>
+  </ul></div></div>
+  <div class="sec strict"><div class="sh">🚫 Strict Reminders</div><div class="sb">
+    <div class="nodo">NO ANTIBIOTIC TABLETS — para sa routine minor wounds</div>
+    <div class="nodo">NO ALCOHOL o H₂O₂ sa loob ng sugat — nagdi-delay ng healing at nakakasira ng tissue</div>
+    <div class="nodo">NO UNDILUTED BETADINE sa loob ng sugat — nakaka-damage ng tissue kung hindi diluted</div>
+    <div class="nodo">NO PAGSASARA ng maruming sugat</div>
+  </div></div>
+  <div class="sec inote"><div class="sh">📋 Internal Note — Staff Only</div><div class="sb"><ul>
+    <li>Betadine = para sa <strong>initial cleaning LAMANG</strong> — dilute 1:10 (1ml + 9ml tubig = 1% solution) bago gamitin sa loob ng sugat</li><li>Paulit-ulit na paggamit ng undiluted Betadine ay nagdi-delay ng healing</li>
+  </ul></div></div>
+</div>
+<div class="col">
+  <div class="sec assess"><div class="sh">🔍 Assess Wound Type</div><div class="sb">
+    <div class="sub">MINOR CUT / HIWA</div><ul><li>Mababaw · Mababa ang pagdurugo</li></ul>
+    <div class="sub">GASGAS / ABRASION</div><ul><li>Surface wound · Madalas may dumi</li></ul>
+    <div class="sub">MINOR BLISTER</div><ul><li>Walang paltos na pumutok · Walang charring</li></ul>
+  </div></div>
+  <div class="sec mgmt"><div class="sh">💊 First Aid — Sundin ang Tamang Pagkakasunod (Lahat ay OTC)</div><div class="sb">
+    <div class="sub">STEP 1 — LINISIN AGAD (5–10 MINUTO)</div>
+    <ul><li>Cool running water + mild soap sa paligid ng sugat</li></ul>
+    <div class="warn">HUWAG: alcohol, hydrogen peroxide, o undiluted iodine sa loob ng sugat — nagdi-delay ng healing</div>
+    <div class="sub">STEP 2 — DISINFECT (Initial Cleaning Lamang)</div>
+    <ul>
+      <li><strong>Povidone-Iodine — DILUTED</strong><div class="brand"><div class="blbl">📦 PH OTC Brand</div><div class="bnames">Betadine solution (10% Povidone-Iodine)</div>
+        <table class="dt"><tr><th>Edad</th><th>Paano Gamitin nang Tama</th></tr>
+          <tr><td class="al">Adults/Bata ≥ 2y</td><td>Dilute 1:10 = 1ml Betadine + 9ml tubig = 1% solution · Gamitin para sa initial cleaning LAMANG · HUWAG paulit-ulit na gamitin</td></tr>
+          <tr class="nr"><td colspan="2">❌ Bata &lt; 2y: I-REFER · ❌ Undiluted Betadine sa loob ng sugat: nakakasira ng tissue · ❌ HUWAG malapit sa mata</td></tr>
+        </table></div></li>
+    </ul>
+    <div class="sub">STEP 3 — PROTEKTAHAN</div>
+    <ul>
+      <li><strong>Petroleum Jelly</strong> — para manatiling basa ang sugat at mapabilis ang healing<div class="brand"><div class="blbl">📦 PH OTC Brand</div><div class="bnames">Vaseline Pure Petroleum Jelly</div>
+        <table class="dt"><tr><th>Edad</th><th>Paano Gamitin</th></tr>
+          <tr><td class="al">Lahat ng edad ≥ 2y</td><td>Manipis na patong sa sugat bago takpan ng dressing</td></tr>
+        </table></div></li>
+      <li><strong>Non-stick Sterile Dressing / Bandage</strong><div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Band-Aid (iba't ibang laki) · Elastoplast · Sterile gauze (generic)</div>
+        <table class="dt"><tr><th>Edad</th><th>Paano Gamitin</th></tr>
+          <tr><td class="al">Lahat ng edad</td><td>Palitan araw-araw o kapag nabasa/nasira · Huwag masyadong mahigpit ang pagbibigkis</td></tr>
+        </table></div></li>
+    </ul>
+    <div class="sub">PARA SA SAKIT — PARACETAMOL LAMANG (HUWAG NSAIDS KUNG MAY BLEEDING RISK)</div>
+    <ul>
+      <li><strong>Paracetamol</strong><div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Biogesic (500mg) · Tempra (500mg) · Calpol</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Interval · Max Bawat Araw</th></tr>
+          <tr><td class="al">Adults ≥18y</td><td>500mg–1g · Bawat 4–6 oras · Max 4g/araw</td></tr>
+          <tr><td class="al">Elderly &gt;65y</td><td>500mg · Bawat 6 oras · Max 2–3g/araw</td></tr>
+          <tr><td class="al">Bata 6–12y</td><td>10–15mg/kg/dose · Bawat 4–6 oras · syrup</td></tr>
+          <tr><td class="al">Bata 2–5y</td><td>10–15mg/kg/dose syrup · Bawat 4–6 oras · (approx. 80–160mg para sa 10–15kg na bata) · Gamitin ang may kasamang dosing cup</td></tr>
+        </table></div></li>
+    </ul>
+  </div></div>
+  <div class="sec supp"><div class="sh">✅ Supportive Care</div><div class="sb"><ul>
+    <li>Palitan dressing araw-araw o kapag nabasa</li><li>Panatilihing malinis at tuyo</li><li>Kumain ng nutritious food at Vitamin C para sa healing</li><li>Iwasan direktang araw habang sariwa ang sugat</li>
+  </ul></div></div>
+</div>
+</div>
+<div class="cfoot"><div class="cfi"><strong>⚠ Hindi ito diagnostic tool.</strong> Para sa MediQuinn Pharmacy staff internal use lamang. · All medications listed are OTC (over-the-counter) — walang reseta na kailangan.</div><div class="cfi"><strong>Trusted Care, Right Around the Corner</strong> · mediquinnpharmacy@gmail.com</div></div>
+</div>
+
+<!-- ═══ CHART 14 — TOOTHACHE ═══ -->
+<div class="chart" id="c14">
+<div class="ch"><div><div class="ch-num">Chart 14 of 17</div><div class="ch-title">Toothache · Masakit na Ngipin</div><div class="ch-sub">Dental Pain — Internal Dispensing Flowchart</div></div><div class="ch-badge">✅ OTC Only</div></div>
+<div class="start"><div class="start-t">START: Pasyente na may Masakit na Ngipin</div><div class="start-q">Kailan nagsimula? Saan banda ang sakit? · May pamamaga, lagnat, nana, o trauma ba?</div></div>
+<div class="dec"><div class="dl dl-r"></div><div class="diamond d-r"><span class="d-sm">Red Flags?</span>YES</div><div class="dl dl-m"></div><div class="diamond d-g"><span class="d-sm">Red Flags?</span>NO</div><div class="dl dl-g"></div></div>
+<div class="cols">
+<div class="col">
+  <div class="sec rf"><div class="sh">🚩 Red Flags — I-Refer / ER Agad</div><div class="sb"><ul>
+    <li>Pamamaga ng mukha, panga, o leeg</li><li>May lagnat</li><li>May nana, mabahong lasa, o masamang amoy</li><li>Hirap lumunok o huminga — <strong>ER agad</strong></li><li>Hindi maibuka ang bibig (trismus)</li><li>Matinding sakit na hindi mapigilan ng OTC</li><li>Toothache &gt; 48 oras na hindi gumagaan</li><li>Trauma: nabungi, naputol, o dumudugong ngipin</li>
+  </ul></div></div>
+  <div class="sec ref"><div class="sh">⚕ I-Refer sa Pharmacist / Dentist AGAD</div><div class="sb"><ul>
+    <li>Buntis o pinanghihinalaang buntis</li><li><strong>Bata &lt; 12 taong gulang</strong></li><li>Senior citizen</li><li>May diabetes o immunocompromised</li><li>May heart disease o on blood thinners</li><li>May chronic kidney o liver disease</li>
+  </ul></div></div>
+  <div class="sec paal"><div class="sh">📢 Paalala sa Pasyente</div><div class="sb"><ul>
+    <li><strong>Mag-DENTIST AGAD</strong> — OTC ay pansamantala lamang</li><li>Kung hindi gumaan sa 24–48 oras — magpatingin</li><li>Kung may pamamaga, lagnat, o hirap huminga — ER agad</li>
+  </ul></div></div>
+  <div class="sec strict"><div class="sh">🚫 Strict Reminders</div><div class="sb">
+    <div class="nodo">NO ANTIBIOTICS — Rx lamang · Kailangan ng doktor</div>
+    <div class="nodo">NO STEROIDS — Rx lamang</div>
+    <div class="nodo">NO REPEAT PAINKILLER SALES nang walang dental referral</div>
+    <div class="nodo">NO "OK LANG YAN" assumptions</div>
+  </div></div>
+  <div class="sec inote"><div class="sh">📋 Internal Note — Staff Only</div><div class="sb"><ul>
+    <li>OTC = <strong>temporary pain relief lamang</strong> — hindi lunas sa dental infection</li><li>Mefenamic Acid = HUWAG sa bata &lt; 14 taon kahit OTC</li><li>Ibuprofen ay mas epektibo kaysa Paracetamol para sa dental pain (anti-inflammatory)</li>
+  </ul></div></div>
+</div>
+<div class="col">
+  <div class="sec assess"><div class="sh">🔍 Assess Likely Type</div><div class="sb">
+    <div class="sub">CAVITY / TOOTH SENSITIVITY</div><ul><li>Sakit sa isang ngipin · Lumalala sa lamig, init, o tamis</li></ul>
+    <div class="sub">GUM PAIN / GINGIVITIS</div><ul><li>Masakit o namamagang gilagid · Madaling dumugo</li></ul>
+    <div class="sub">POSSIBLE LOCALIZED INFECTION</div><ul><li>Throbbing pain · Tender gums · Kailangan ng dental check</li></ul>
+  </div></div>
+  <div class="sec mgmt"><div class="sh">💊 Temporary OTC Pain Control — Piliin LANG ang ISA</div><div class="sb">
+    <ul>
+      <li><strong>Paracetamol</strong> — pinaka-ligtas para sa lahat<div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Biogesic (500mg) · Tempra (500mg) · Calpol · Panadol</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Interval · Max Bawat Araw</th></tr>
+          <tr><td class="al">Adults ≥18y</td><td>500mg–1g · Bawat 4–6 oras · Max 4g/araw</td></tr>
+          <tr><td class="al">Elderly &gt;65y</td><td>500mg · Bawat 6 oras · Max 2–3g/araw</td></tr>
+          <tr><td class="al">Bata 12–17y</td><td>500mg–1g · Bawat 4–6 oras · Max 4g/araw</td></tr>
+        </table></div></li>
+      <li><strong>Ibuprofen</strong> — mas epektibo para sa dental inflammation<div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Medicol (200mg, 400mg) · Advil (200mg)</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Interval · Max Bawat Araw</th></tr>
+          <tr><td class="al">Adults ≥18y</td><td>200mg muna · Pwedeng 400mg · Bawat 4–6 oras · Max 1,200mg/araw OTC · Kumain muna</td></tr>
+          <tr><td class="al">Elderly &gt;65y</td><td>200mg · Bawat 6–8 oras · Gamitin nang maingat</td></tr>
+          <tr class="nr"><td colspan="2">❌ HUWAG kung may ulcer, kidney disease, o buntis · Kumain muna bago uminom</td></tr>
+        </table></div></li>
+      <li><strong>Mefenamic Acid</strong> — para sa adults at adolescents ≥14y lamang<div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Ponstan (500mg) · Dolfenal (500mg) · Mefenamic 250mg capsule (generic)</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Interval · Max Tagal</th></tr>
+          <tr><td class="al">Adults/≥14y</td><td>Simulan sa 250mg capsule · Pwedeng 500mg · Bawat 6–8 oras · <strong>LAGING KUMAIN MUNA</strong> · Max 7 araw nang walang doktor</td></tr>
+          <tr class="nr"><td colspan="2">❌ Bata &lt; 14 taon: KONTRAINDIKADO · ❌ HUWAG kung may ulcer, kidney disease, o buntis</td></tr>
+        </table></div></li>
+    </ul>
+    <div class="warn">PILIIN LANG ANG ISA — HUWAG pagsabayin ang mga pain relievers</div>
+    <div class="sub">LOCAL CARE</div>
+    <ul><li>Warm saltwater gargle — 3–4× araw</li><li>Cold compress sa pisngi — 10–15 minuto intervals</li><li>Iwasan very hot, malamig, at matamis na pagkain</li><li>Huwag pagnguya sa masakit na side</li></ul>
+    <div class="warn">Pang-ginhawa lamang — HINDI lunas. Mag-DENTIST agad.</div>
+  </div></div>
+  <div class="sec supp"><div class="sh">✅ Supportive Care</div><div class="sb"><ul>
+    <li>Malambot na pagkain habang masakit</li><li>Gentle brushing — panatilihing malinis ang bibig</li><li>Mag-schedule ng dentist appointment <strong>AGAD</strong></li>
+  </ul></div></div>
+</div>
+</div>
+<div class="cfoot"><div class="cfi"><strong>⚠ Hindi ito diagnostic tool.</strong> Para sa MediQuinn Pharmacy staff internal use lamang. · All medications listed are OTC (over-the-counter) — walang reseta na kailangan.</div><div class="cfi"><strong>Trusted Care, Right Around the Corner</strong> · mediquinnpharmacy@gmail.com</div></div>
+</div>
+
+<!-- ═══ CHART 15 — VOMITING ═══ -->
+<div class="chart" id="c15">
+<div class="ch"><div><div class="ch-num">Chart 15 of 17</div><div class="ch-title">Vomiting · Pagsusuka</div><div class="ch-sub">Nausea &amp; Vomiting — Internal Dispensing Flowchart</div></div><div class="ch-badge">✅ OTC Only</div></div>
+<div class="start"><div class="start-t">START: Pasyente na Nagsusuka</div><div class="start-q">Kailan nagsimula? Ilang beses sumuka? · May lagnat, sakit ng tiyan, o pagtatae ba?</div></div>
+<div class="dec"><div class="dl dl-r"></div><div class="diamond d-r"><span class="d-sm">Red Flags?</span>YES</div><div class="dl dl-m"></div><div class="diamond d-g"><span class="d-sm">Red Flags?</span>NO</div><div class="dl dl-g"></div></div>
+<div class="cols">
+<div class="col">
+  <div class="sec rf"><div class="sh">🚩 Red Flags — I-Refer / ER Agad</div><div class="sb"><ul>
+    <li>May dugo o mukhang kape ang suka</li><li>Matinding sakit ng tiyan</li><li>Lagnat ≥ 38.5°C</li><li>Hindi makainom ng fluids sa kakasuka</li><li>Signs ng dehydration: tuyong bibig, bihirang ihi, hilo</li><li>Pagsusuka pagkatapos ng head injury</li><li>Pagsusuka + matinding sakit ng ulo o paninigas ng leeg — <strong>ER agad</strong></li>
+  </ul></div></div>
+  <div class="sec ref"><div class="sh">⚕ I-Refer sa Pharmacist / Doctor AGAD</div><div class="sb"><ul>
+    <li>Buntis o pinanghihinalaang buntis</li><li><strong>Bata &lt; 12 taon</strong> para sa Meclizine · <strong>Bata &lt; 5 taon</strong> para sa Cinnarizine</li><li>Senior citizen</li><li>May altapresyon, diabetes, sakit sa puso · Immunocompromised</li>
+  </ul></div></div>
+  <div class="sec paal"><div class="sh">📢 Paalala sa Pasyente</div><div class="sb"><ul>
+    <li><strong>ORS ang pinakamahalaga</strong> — hydration muna bago gamot</li><li>Kung hindi makainom ng fluids — magpatingin agad</li><li>Kung may dugo sa suka o matinding sakit ng tiyan — ER agad</li>
+  </ul></div></div>
+  <div class="sec strict"><div class="sh">🚫 Strict Reminders</div><div class="sb">
+    <div class="nodo">NO ANTIBIOTICS OR STEROIDS</div>
+    <div class="nodo">NO METOCLOPRAMIDE (PLASIL) — Rx lamang, HINDI OTC</div>
+    <div class="nodo">NO PAINKILLERS kung hindi pa alam ang sanhi</div>
+    <div class="nodo">NO ASSUMPTION NA "NAKAEN LANG"</div>
+  </div></div>
+  <div class="sec inote"><div class="sh">📋 Internal Note — Staff Only</div><div class="sb"><ul>
+    <li>Metoclopramide (Plasil) = <strong>HINDI OTC — Rx lamang</strong> — huwag rekomendasyon</li><li>Pagsusuka = symptom, hindi diagnosis</li><li>Persistent vomiting = referral, hindi repeat sale</li>
+  </ul></div></div>
+</div>
+<div class="col">
+  <div class="sec assess"><div class="sh">🔍 Assess Likely Type</div><div class="sb">
+    <div class="sub">ACUTE GASTROENTERITIS</div><ul><li>Biglaang pagsusuka · Maaaring may LBM · Walang dugo · Walang severe pain</li></ul>
+    <div class="sub">MOTION-RELATED</div><ul><li>Pagsusuka habang bumibiyahe · May hilo</li></ul>
+    <div class="sub">HYPERACIDITY / GERD-RELATED</div><ul><li>May hapdi sa sikmura · Maasim · Lumalala pagkatapos kumain</li></ul>
+  </div></div>
+  <div class="sec mgmt"><div class="sh">💊 OTC Management — Unahin ang Hydration</div><div class="sb">
+    <div class="sub">HYDRATION — PANGUNAHING HAKBANG (OTC)</div>
+    <ul>
+      <li><strong>ORS (Oral Rehydration Salts)</strong><div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Hydrite sachets · Oresol sachets · Pedialyte</div>
+        <table class="dt"><tr><th>Edad</th><th>Paano Gamitin</th></tr>
+          <tr><td class="al">Adults ≥18y</td><td>1 sachet sa 250ml MALINIS na tubig · 5–10ml bawat 1–2 minuto kung sobrang suka · Dagdagan habang gumagaling</td></tr>
+          <tr><td class="al">Bata 6–12y</td><td>5ml bawat 1–2 minuto · Gamitin ang Pedialyte o Oresol</td></tr>
+          <tr><td class="al">Bata 2–5y</td><td>Gamitin ang Pedialyte · 5ml bawat 1–2 minuto</td></tr>
+          <tr class="nw"><td colspan="2">⚠ Mas mahalaga ang fluids kaysa gamot · Inumin paunti-unti pero madalas</td></tr>
+        </table></div></li>
+    </ul>
+    <div class="sub">KUNG MOTION-RELATED NA PAGSUSUKA — OTC</div>
+    <ul>
+      <li><strong>Meclizine HCl 25mg</strong> — para sa ≥12y lamang<div class="brand"><div class="blbl">📦 PH OTC Brand</div><div class="bnames">Bonamine (Meclizine HCl 25mg)</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Paano Gamitin</th></tr>
+          <tr><td class="al">Adults/≥12y</td><td>25mg (1 tab) · 1 oras bago bumiyahe · Nakaka-antok · HUWAG magmaneho</td></tr>
+          <tr><td class="al">Elderly &gt;65y</td><td>12.5mg (½ tab) · mas sensitive sa antok</td></tr>
+          <tr class="nr"><td colspan="2">❌ Bata &lt; 12 taon: I-REFER sa doktor</td></tr>
+        </table></div></li>
+      <li><strong>Cinnarizine 25mg</strong> — alternatibo<div class="brand"><div class="blbl">📦 PH OTC Brand</div><div class="bnames">Stugeron (Cinnarizine 25mg)</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Paano Gamitin</th></tr>
+          <tr><td class="al">Adults ≥18y</td><td>25mg · 3× araw kasabay ng pagkain · Motion sickness: 25mg · 2 oras bago bumiyahe</td></tr>
+          <tr><td class="al">Bata 5–12y</td><td>12.5mg (½ tab) · 3× araw kasabay ng pagkain</td></tr>
+          <tr class="nr"><td colspan="2">❌ Bata &lt; 5 taon: KONTRAINDIKADO · ⚠ Nakaka-antok</td></tr>
+        </table></div></li>
+    </ul>
+    <div class="sub">KUNG HYPERACIDITY-RELATED — OTC</div>
+    <ul>
+      <li><strong>Antacid (Kremil-S) o Famotidine (Kremil-S Advance)</strong> — tingnan ang doses sa Chart 12<div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Kremil-S (antacid) · Kremil-S Advance (Famotidine 20mg)</div></div></li>
+    </ul>
+    <div class="warn">Iwasan spicy, oily, kape, at alkohol</div>
+  </div></div>
+  <div class="sec supp"><div class="sh">✅ Supportive Care</div><div class="sb"><ul>
+    <li>Pahinga at fresh air</li><li>Iwas muna sa solid food — magsimula sa malinaw na likido (sabaw, tubig)</li><li>BRAT diet kapag humupa na: saging, kanin, mansanas, tinapay</li><li>Iwas mamantika at maasim na pagkain</li>
+  </ul></div></div>
+</div>
+</div>
+<div class="cfoot"><div class="cfi"><strong>⚠ Hindi ito diagnostic tool.</strong> Para sa MediQuinn Pharmacy staff internal use lamang. · All medications listed are OTC (over-the-counter) — walang reseta na kailangan.</div><div class="cfi"><strong>Trusted Care, Right Around the Corner</strong> · mediquinnpharmacy@gmail.com</div></div>
+</div>
+
+<!-- ═══ CHART 16 — PRODUCTIVE COUGH ═══ -->
+<div class="chart" id="c16">
+<div class="ch"><div><div class="ch-num">Chart 16 of 17</div><div class="ch-title">Productive Cough · Ubong may Plema</div><div class="ch-sub">Productive Cough — Internal Dispensing Flowchart</div></div><div class="ch-badge">✅ OTC Only</div></div>
+<div class="start"><div class="start-t">START: Pasyente na may Ubong may Plema</div><div class="start-q">Kailan nagsimula? Anong kulay ng plema? · May lagnat o hirap huminga ba?</div></div>
+<div class="dec"><div class="dl dl-r"></div><div class="diamond d-r"><span class="d-sm">Red Flags?</span>YES</div><div class="dl dl-m"></div><div class="diamond d-g"><span class="d-sm">Red Flags?</span>NO</div><div class="dl dl-g"></div></div>
+<div class="cols">
+<div class="col">
+  <div class="sec rf"><div class="sh">🚩 Red Flags — I-Refer Agad</div><div class="sb"><ul>
+    <li>Ubo &gt; 7 araw na hindi gumagaling</li><li>Lagnat ≥ 38.5°C</li><li>Hirap huminga o chest pain</li><li>Ubo na lumalala sa gabi + wheezing</li><li>May dugo sa ubo</li><li>Exposure sa TB patient</li><li>Paulit-ulit na ubo + pagbaba ng timbang</li>
+  </ul></div></div>
+  <div class="sec ref"><div class="sh">⚕ I-Refer sa Pharmacist / Doctor AGAD</div><div class="sb"><ul>
+    <li>Buntis o pinanghihinalaang buntis</li><li><strong>Bata &lt; 6 taong gulang</strong> o Senior citizen</li><li>May hika, TB, COPD, o sakit sa puso</li><li>Umiinom ng ACE inhibitors</li><li>Immunocompromised</li>
+  </ul></div></div>
+  <div class="sec paal"><div class="sh">📢 Paalala sa Pasyente</div><div class="sb"><ul>
+    <li>Kung hindi gumaling sa 3–5 araw — magpatingin</li><li><strong>Huwag pigilan ang ubo kung may plema</strong> — kailangan itong mailabas</li>
+  </ul></div></div>
+  <div class="sec strict"><div class="sh">🚫 Strict Reminders</div><div class="sb">
+    <div class="nodo">NO ANTIBIOTICS — karaniwang viral</div>
+    <div class="nodo">NO COUGH SUPPRESSANTS (DXM) para sa ubong MAY PLEMA — palalakasin ang ubo, hindi pigilan</div>
+    <div class="nodo">NO STEROIDS — Rx lamang</div>
+  </div></div>
+  <div class="sec inote"><div class="sh">📋 Internal Note — Staff Only</div><div class="sb"><ul>
+    <li><strong>Carbocisteine (Solmux) = MUCOLYTIC</strong> — binabago ang viscosity ng plema para madaling mailabas</li><li><strong>Ambroxol (Mucosolvan) = EXPECTORANT</strong> — nagpapataas ng secretion volume para mailabas ang plema</li><li>Productive cough = linisin ang plema, hindi pigilan</li>
+  </ul></div></div>
+</div>
+<div class="col">
+  <div class="sec assess"><div class="sh">🔍 Assess Likely Cause</div><div class="sb">
+    <div class="sub">ACUTE COUGH (Cold / Flu-Related)</div><ul><li>May plema · Sipon o sore throat · Walang matinding lagnat</li></ul>
+    <div class="sub">CHEST CONGESTION / MAKAPAL NA PLEMA</div><ul><li>Hirap ilabas ang plema · Parang barado ang dibdib</li></ul>
+    <div class="sub">ALLERGY-RELATED COUGH WITH PHLEGM</div><ul><li>Tumutulo ang sipon · Makati ilong/lalamunan · Walang lagnat</li></ul>
+  </div></div>
+  <div class="sec mgmt"><div class="sh">💊 OTC Management Based on Cause</div><div class="sb">
+    <div class="sub">KUNG MAY MAKAPAL NA PLEMA — MUCOLYTIC (OTC)</div>
+    <ul>
+      <li><strong>Carbocisteine</strong> — Mucolytic · binabago ang kapal ng plema<div class="brand"><div class="blbl">📦 PH OTC Brand</div><div class="bnames">Solmux (375mg/500mg capsule) · Solmux Kids syrup</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Frequency</th></tr>
+          <tr><td class="al">Adults ≥18y</td><td>375–500mg · 3× araw</td></tr>
+          <tr><td class="al">Bata 6–12y</td><td>250mg (5ml syrup 50mg/ml) · 3× araw</td></tr>
+          <tr><td class="al">Bata 2–5y</td><td>62.5–125mg · 3× araw · Gamitin ang Solmux Kids syrup</td></tr>
+          <tr class="nr"><td colspan="2">❌ Bata &lt; 2 taon: I-REFER · ⚠ Uminom ng maraming tubig</td></tr>
+        </table></div></li>
+      <li><strong>Ambroxol</strong> — Expectorant · tumutulong na mailabas ang plema<div class="brand"><div class="blbl">📦 PH OTC Brand</div><div class="bnames">Mucosolvan (Ambroxol 30mg tablet · 15mg/5ml syrup) · Lazolvan</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Frequency</th></tr>
+          <tr><td class="al">Adults ≥18y</td><td>30mg · 3× araw (unang 2–3 araw) · tapos 30mg · 2× araw</td></tr>
+          <tr><td class="al">Bata 6–12y</td><td>15mg (5ml syrup) · 2–3× araw</td></tr>
+          <tr><td class="al">Bata 2–5y</td><td>7.5mg (2.5ml syrup) · 3× araw</td></tr>
+          <tr class="nr"><td colspan="2">❌ Bata &lt; 2 taon: Medical supervision lamang · ⚠ Uminom ng maraming tubig</td></tr>
+        </table></div></li>
+      <li><strong>Lagundi</strong> — DOH-Accepted Herbal Mucolytic (OTC)<div class="brand"><div class="blbl">📦 PH OTC Brand</div><div class="bnames">Ascof Lagundi (300mg tablet · 300mg/5ml syrup)</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Frequency</th></tr>
+          <tr><td class="al">Adults ≥18y</td><td>300–600mg (1–2 tabs) · 3× araw</td></tr>
+          <tr><td class="al">Bata 6–12y</td><td>300mg (5ml syrup) · 3× araw</td></tr>
+          <tr><td class="al">Bata 2–5y</td><td>150mg (2.5ml syrup) · 3× araw</td></tr>
+          <tr class="nw"><td colspan="2">⚠ DOH-accepted herbal OTC · Gamitin ang syrup para sa bata</td></tr>
+        </table></div></li>
+    </ul>
+    <div class="warn">HUWAG pagsabayin ang mucolytic/expectorant sa cough suppressant (Dextromethorphan)</div>
+    <div class="sub">ALLERGY-RELATED — OTC ANTIHISTAMINE</div>
+    <ul>
+      <li><strong>Loratadine o Cetirizine</strong> — tingnan ang age-grouped doses sa Chart 08<div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Allerta / Claritin (Loratadine 10mg) · Virlix / Zyrtec (Cetirizine 10mg)</div></div></li>
+    </ul>
+    <div class="warn">Iwasan decongestants para sa may altapresyon o sakit sa puso</div>
+  </div></div>
+  <div class="sec supp"><div class="sh">✅ Supportive Care</div><div class="sb"><ul>
+    <li>Maraming mainit na inumin — tubig, tsaa, sabaw</li><li>Steam inhalation — umaga at gabi kung posible</li><li>Pahinga at sapat na tulog</li><li>Iwas usok at alikabok</li><li>Tamang pag-ubo — huwag pigilin kung may plema</li>
+  </ul></div></div>
+</div>
+</div>
+<div class="cfoot"><div class="cfi"><strong>⚠ Hindi ito diagnostic tool.</strong> Para sa MediQuinn Pharmacy staff internal use lamang. · All medications listed are OTC (over-the-counter) — walang reseta na kailangan.</div><div class="cfi"><strong>Trusted Care, Right Around the Corner</strong> · mediquinnpharmacy@gmail.com</div></div>
+</div>
+
+<!-- ═══ CHART 17 — PA TOOTHACHE SCREENING ═══ -->
+<div class="chart" id="c17">
+<div class="ch"><div><div class="ch-num">Chart 17 of 17</div><div class="ch-title">Toothache — PA Screening Guide</div><div class="ch-sub">Para sa Pharmacy Assistants — Screening &amp; Referral Support Lamang</div></div><div class="ch-badge">✅ OTC Only</div></div>
+<div class="start"><div class="start-t">PATIENT COMPLAINS OF TOOTHACHE — SURIIN MUNA ANG RED FLAGS</div><div class="start-q">Hindi ito diagnostic tool. Role ng PA: i-screen ang red flags, mag-suggest ng OTC kung wala, i-refer sa pharmacist o dentist kung may duda.</div></div>
+<div class="dec"><div class="dl dl-r"></div><div class="diamond d-r"><span class="d-sm">Red Flags?</span>YES</div><div class="dl dl-m"></div><div class="diamond d-g"><span class="d-sm">Red Flags?</span>NO</div><div class="dl dl-g"></div></div>
+<div class="cols">
+<div class="col">
+  <div class="sec rf"><div class="sh">🚩 Red Flags — HUWAG BIGYAN NG OTC NANG WALANG PHARMACIST</div><div class="sb"><ul>
+    <li>Severe o throbbing pain</li><li>Pamamaga ng mukha o panga</li><li>Fever o chills</li><li>Pamamaga ng gum, redness, bleeding, o nana</li><li>Loose tooth</li><li>Masamang lasa o amoy</li><li>Toothache &gt; 1 linggo na hindi gumagaan</li>
+  </ul></div></div>
+  <div class="sec ref" style="border-color:#FFCDD2;"><div class="sh" style="background:linear-gradient(90deg,#B71C1C,#C62828);">⛔ DO NOT DISPENSE OTC — I-REFER AGAD</div><div class="sb" style="background:#FFEBEE;"><p style="font-size:16px;font-weight:900;color:#B71C1C;text-align:center;padding:10px 0;">I-REFER SA PHARMACIST O DENTIST</p></div></div>
+  <div class="sec paal"><div class="sh">📋 PA Reminder — Lagi Itong Tandaan</div><div class="sb">
+    <div class="nodo">Do NOT diagnose illnesses</div>
+    <div class="nodo">Do NOT recommend prescription medicines</div>
+    <ul style="margin-top:8px;"><li>Kung hindi sigurado → <strong>tanungin ang Pharmacist</strong></li><li>OTC = pansamantalang relief lamang</li><li>Laging ituro ang pagpunta sa dentist</li></ul>
+  </div></div>
+</div>
+<div class="col">
+  <div class="sec assess"><div class="sh">🔍 No Red Flags — Assessment Questions</div><div class="sb"><ul>
+    <li>Gaano katagal na masakit?</li><li>May heat sensitivity o banayad na pamamaga ng gum?</li><li>Umiinom ba ng ibang gamot? (check interactions)</li><li>May history ng ulcer, kidney disease, o heart condition?</li><li>Buntis ba? Ilang taong gulang?</li>
+  </ul></div></div>
+  <div class="sec mgmt"><div class="sh">💊 OTC Pain Relief — Piliin LANG ang ISA</div><div class="sb">
+    <ul>
+      <li><strong>Paracetamol</strong> — pinaka-ligtas para sa lahat<div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Biogesic (500mg) · Tempra (500mg) · Calpol · Panadol</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Interval · Max</th></tr>
+          <tr><td class="al">Adults ≥18y</td><td>500mg–1g · Bawat 4–6 oras · Max 4g/araw</td></tr>
+          <tr><td class="al">Elderly &gt;65y</td><td>500mg · Bawat 6 oras · Max 2–3g/araw</td></tr>
+          <tr><td class="al">Bata 12–17y</td><td>500mg–1g · Bawat 4–6 oras · Max 4g/araw</td></tr>
+        </table></div></li>
+      <li><strong>Ibuprofen</strong> — mas epektibo para sa dental inflammation<div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Medicol (200mg, 400mg) · Advil (200mg)</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Interval · Max</th></tr>
+          <tr><td class="al">Adults ≥18y</td><td>200mg muna · Pwedeng 400mg · Bawat 4–6 oras · Max 1,200mg/araw · Kumain muna</td></tr>
+          <tr class="nr"><td colspan="2">❌ HUWAG kung may ulcer, kidney disease, o buntis</td></tr>
+        </table></div></li>
+      <li><strong>Mefenamic Acid</strong> — para sa adults at ≥14y lamang<div class="brand"><div class="blbl">📦 PH OTC Brands</div><div class="bnames">Ponstan (500mg) · Dolfenal (500mg) · Mefenamic 250mg (generic)</div>
+        <table class="dt"><tr><th>Edad</th><th>Dosis · Interval · Max</th></tr>
+          <tr><td class="al">Adults/≥14y</td><td>Simulan sa 250mg capsule · Pwedeng 500mg · Bawat 6–8 oras · <strong>LAGING KUMAIN MUNA</strong> · Max 7 araw</td></tr>
+          <tr class="nr"><td colspan="2">❌ Bata &lt; 14 taon: KONTRAINDIKADO · ❌ HUWAG kung may ulcer o kidney disease</td></tr>
+        </table></div></li>
+    </ul>
+    <div class="warn">PILIIN LANG ANG ISA — HUWAG pagsabayin ang mga pain relievers</div>
+    <div class="sub">Additional Comfort Measures</div>
+    <ul>
+      <li>Warm saltwater gargle — 3–4× araw (adults at bata ≥ 6y)</li>
+      <li>Cold compress sa pisngi — 10–15 minuto intervals</li>
+      <li>Iwasan very hot, malamig, at matamis na pagkain</li>
+      <li><strong>Mag-DENTIST AGAD</strong> — kahit gumaan na ang sakit</li>
+    </ul>
+  </div></div>
+  <div class="sec supp"><div class="sh">✅ Always Advise</div><div class="sb"><ul>
+    <li>OTC = <strong>pansamantalang relief lamang</strong></li><li>Kumain bago uminom ng pain reliever</li><li>Huwag uminom ng alak habang may pain reliever</li><li><strong>Mag-dentist appointment AGAD</strong> — kahit gumaan na ang sakit</li>
+  </ul></div></div>
+</div>
+</div>
+<div class="cfoot"><div class="cfi"><strong>⚠ Hindi ito diagnostic tool.</strong> Para sa MediQuinn Pharmacy staff internal use lamang. · All medications listed are OTC (over-the-counter) — walang reseta na kailangan.</div><div class="cfi"><strong>Trusted Care, Right Around the Corner</strong> · mediquinnpharmacy@gmail.com</div></div>
+</div>
+
+<script>
+function show(v){document.querySelectorAll('.chart').forEach(c=>c.classList.remove('active'));if(v)document.getElementById(v)?.classList.add('active');}
+window.addEventListener('load',()=>{document.getElementById('sel').value='c01';show('c01');});
+</script>
+</body>
+</html>
